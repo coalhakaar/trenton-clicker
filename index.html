@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Fixed UI</title>
+<title>Trenton Ascended: Expansion</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
         --bg: #020406; --accent: #00d2ff; --glass: rgba(255,255,255,0.04);
         --glass-border: rgba(255,255,255,0.08); --rebirth: #a29bfe;
         --success: #00ff88; --midas: #ffd700; --crit: #ff4757;
-        --final: #ff00ff; --fira: 'Fira Code', monospace;
-        --sidebar-w: 460px;
+        --fira: 'Fira Code', monospace;
+        --sidebar-w: 480px;
     }
     *, *::before, *::after { box-sizing: border-box; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: var(--fira); background: var(--bg); color: #e6edf3; overflow: hidden; }
@@ -21,109 +21,107 @@
 
     /* LEFT PANEL */
     #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
-    h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 4px; margin-bottom: 20px; opacity: 0.8; }
-
+    
+    #trenton-container { position: relative; cursor: pointer; user-select: none; }
     #trenton {
-        width: 240px; height: 240px; border-radius: 50%; object-fit: cover;
-        border: 4px solid var(--accent); cursor: pointer;
-        box-shadow: 0 0 50px rgba(0,210,255,0.15); user-select: none;
-        transition: transform 0.05s;
+        width: 260px; height: 260px; border-radius: 50%; object-fit: cover;
+        border: 4px solid var(--accent); transition: transform 0.05s;
+        box-shadow: 0 0 60px rgba(0,210,255,0.1);
     }
-    #trenton:active { transform: scale(0.95); }
+    #trenton:active { transform: scale(0.94); }
+
+    /* RIPPLE EFFECT */
+    .ripple {
+        position: absolute; border-radius: 50%; pointer-events: none;
+        border: 2px solid var(--accent); animation: ripple-out 0.6s ease-out forwards;
+        transform: translate(-50%, -50%); z-index: 50;
+    }
+    .ripple.crit { border-color: var(--crit); border-width: 4px; box-shadow: 0 0 15px var(--crit); }
+    @keyframes ripple-out {
+        0% { width: 0; height: 0; opacity: 1; }
+        100% { width: 150px; height: 150px; opacity: 0; }
+    }
 
     #score-box {
-        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 40px;
-        margin-top: 25px; border-radius: 12px; font-size: 2.8rem; font-weight: 700;
-        backdrop-filter: blur(10px); min-width: 300px; text-align: center;
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 50px;
+        margin-top: 30px; border-radius: 15px; font-size: 3rem; font-weight: 700;
+        backdrop-filter: blur(10px); text-align: center; color: #fff;
     }
 
-    /* STATS FOOTER */
-    #stats {
-        position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 90px;
-        background: #000; border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center; z-index: 10;
-    }
-    .stat label { font-size: 0.6rem; color: #666; display: block; letter-spacing: 1px; margin-bottom: 4px; }
-    .stat span { font-size: 1.1rem; font-weight: 700; color: #fff; }
-
-    /* SIDEBAR */
-    #shop-container { background: #080a0c; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
+    /* SIDEBAR & TABS */
+    #shop-container { background: #05070a; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
     #sidebar-header { background: #000; border-bottom: 1px solid var(--glass-border); }
     .tabs { display: flex; }
     .tab-btn {
-        flex: 1; padding: 20px; border: none; background: transparent; color: #555;
+        flex: 1; padding: 20px; border: none; background: transparent; color: #444;
         cursor: pointer; font-family: var(--fira); font-weight: 700; font-size: 0.8rem;
-        border-bottom: 2px solid transparent;
     }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(255,255,255,0.02); }
+    .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: rgba(255,255,255,0.02); }
 
-    #buy-mult-strip { display: flex; background: #000; padding: 8px; gap: 8px; }
+    #buy-mult-strip { display: flex; background: #000; padding: 10px; gap: 8px; }
     .mult-btn {
-        flex: 1; padding: 10px; font-size: 0.7rem; background: #111; border: 1px solid #222;
-        color: #666; cursor: pointer; border-radius: 4px; font-family: var(--fira);
+        flex: 1; padding: 8px; font-size: 0.7rem; background: #111; border: 1px solid #222;
+        color: #555; cursor: pointer; border-radius: 4px; font-family: var(--fira);
     }
     .mult-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
 
-    #shop-list { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    #shop-list { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 
-    /* ═══════════════════════════════════
-       DYNAMIC UPGRADE CARDS (NO CUTOFF)
-       ═══════════════════════════════════ */
+    /* UPGRADE CARDS (NO CUTOFF) */
     .card {
-        width: 100%; height: auto; min-height: 160px; /* Allow expansion */
-        border-radius: 12px; cursor: pointer; transition: background 0.2s, transform 0.1s;
-        position: relative; overflow: visible; background: #0f1419; border: 1px solid #21262d;
-        display: flex; flex-direction: column;
+        width: 100%; min-height: 180px; border-radius: 12px; cursor: pointer; transition: 0.2s;
+        position: relative; background: #0f1419; border: 1px solid #21262d;
+        display: flex; flex-direction: column; overflow: visible;
     }
-    .card:hover:not(.locked) { border-color: var(--accent); background: #161b22; transform: translateX(4px); }
-    .card.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-    
+    .card:hover:not(.locked) { border-color: var(--accent); background: #161b22; transform: translateX(6px); }
+    .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
     .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); border-radius: 12px 0 0 12px; }
     .card.is-midas::before { background: var(--midas); }
-    .card.is-perk::before  { background: var(--rebirth); }
 
-    .card-inner { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
-    
+    .card-inner { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
-    .card-name { font-size: 1rem; font-weight: 700; color: #fff; }
-    .card-lvl { font-size: 0.75rem; font-weight: 800; color: var(--accent); }
+    .card-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .card-lvl { font-size: 0.8rem; font-weight: 800; color: var(--accent); background: rgba(0,210,255,0.1); padding: 4px 12px; border-radius: 20px; }
 
-    /* THE STATS STACK - Prevents horizontal squishing */
-    .stat-row { 
-        display: flex; flex-direction: column; gap: 8px; 
-        background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03);
-    }
-    .data-line { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .d-label { font-size: 0.6rem; color: #555; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-    .d-val { font-size: 0.9rem; font-weight: 700; }
-    
+    .stat-stack { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .data-line { display: flex; justify-content: space-between; align-items: center; }
+    .d-label { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 700; }
+    .d-val { font-size: 0.95rem; font-weight: 700; }
     .d-val.boost { color: var(--success); }
     .d-val.total { color: var(--accent); }
-    .d-val.price { color: var(--midas); font-size: 1rem; }
+    .d-val.price { color: var(--midas); font-size: 1.1rem; }
 
-    #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; }
+    /* FOOTER STATS */
+    #stats {
+        position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 90px;
+        background: #000; border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center;
+    }
+    .stat label { font-size: 0.65rem; color: #555; display: block; letter-spacing: 2px; }
+    .stat span { font-size: 1.2rem; font-weight: 700; color: #fff; }
 </style>
 </head>
 <body>
+
 <div id="game">
-    <button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
     <div id="main">
-        <h1>TRENTON ASCENDED</h1>
-        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        <div id="trenton-container" onclick="App.click(event)">
+            <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton">
+        </div>
         <div id="score-box">0</div>
-        <button id="rebirth-btn" onclick="App.rebirth()" style="width:300px; padding:15px; margin-top:20px; border:none; border-radius:8px; background:var(--rebirth); font-family:var(--fira); font-weight:bold; cursor:pointer;" disabled>REBIRTH</button>
+        <button id="rebirth-btn" onclick="App.rebirth()" style="margin-top:20px; width:280px; padding:15px; border:none; border-radius:8px; background:var(--rebirth); color:#000; font-family:var(--fira); font-weight:bold; cursor:pointer;" disabled>REBIRTH</button>
     </div>
 
     <div id="shop-container">
         <div id="sidebar-header">
             <div class="tabs">
-                <button class="tab-btn active" onclick="App.setTab('upgrades')">UPGRADES</button>
-                <button class="tab-btn" onclick="App.setTab('rebirth')">PERKS</button>
+                <button class="tab-btn active">UPGRADES</button>
+                <button class="tab-btn">PERKS</button>
             </div>
             <div id="buy-mult-strip">
-                <button class="mult-btn active" onclick="App.setMult(1)">1X</button>
-                <button class="mult-btn" onclick="App.setMult(10)">10X</button>
-                <button class="mult-btn" onclick="App.setMult('MAX')">MAX</button>
+                <button class="mult-btn active" onclick="App.setMult(1)">BUY 1X</button>
+                <button class="mult-btn" onclick="App.setMult(10)">BUY 10X</button>
+                <button class="mult-btn" onclick="App.setMult('MAX')">BUY MAX</button>
             </div>
         </div>
         <div id="shop-list"></div>
@@ -133,40 +131,49 @@
 <div id="stats">
     <div class="stat"><label>CPS</label><span id="st-cps">0</span></div>
     <div class="stat"><label>CPC</label><span id="st-cpc">1</span></div>
-    <div class="stat"><label>CRIT</label><span id="st-crit">5%</span></div>
     <div class="stat"><label>MULTI</label><span id="st-mult">×1.0</span></div>
 </div>
 
 <script>
 const App = (() => {
-    const SFX = ["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","UDc","DDc","TDc","Vg"];
+    const SFX = ["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","UDc","DDc","TDc","Vg","UVg","DVg"];
     const fmt = n => {
         if (n < 1000) return Math.floor(n).toString();
         const e = Math.min(Math.floor(Math.log10(Math.abs(n)) / 3), SFX.length - 1);
         return (n / Math.pow(10, e * 3)).toFixed(2) + SFX[e];
     };
 
+    // EXPANDED UPGRADE LIST (18 Tiers)
     const BASE_UPGRADES = [
-        { id:'m',  n:'Mass Gain', type:'CPS', p:1, c:10, s:1.15 },
-        { id:'s',  n:'Strength Training', type:'CPC', p:5, c:80, s:1.18 },
-        { id:'sh', n:'Bio-Power', type:'CPS', p:25, c:600, s:1.22 },
-        { id:'q',  n:'Quantum Lift', type:'CPC', p:150, c:12000, s:1.28 },
-        { id:'cy', n:'Cyber Frame', type:'CPS', p:10000, c:1e6, s:1.35 },
-        { id:'v',  n:'Void Breath', type:'CPC', p:45000, c:1e8, s:1.38 },
-        { id:'mi', n:'Midas Touch', type:'MULT', p:2, c:1e15, s:10, isMidas:true }
+        { id:'u1',  n:'Muscle Fiber',      type:'CPC', p:2,       c:15,      s:1.15 },
+        { id:'u2',  n:'Auto-Clicker',      type:'CPS', p:1,       c:100,     s:1.16 },
+        { id:'u3',  n:'Protein Synth',     type:'CPC', p:10,      c:500,     s:1.18 },
+        { id:'u4',  n:'Neural Link',       type:'CPS', p:8,       c:2500,    s:1.20 },
+        { id:'u5',  n:'Kinetic Battery',   type:'CPC', p:50,      c:12000,   s:1.22 },
+        { id:'u6',  n:'Stellar Nursery',   type:'CPS', p:45,      c:60000,   s:1.24 },
+        { id:'u7',  n:'Fusion Core',       type:'CPS', p:200,     c:3.5e5,   s:1.26 },
+        { id:'u8',  n:'Gravity Forge',     type:'CPC', p:1200,    c:1.2e6,   s:1.28 },
+        { id:'u9',  n:'Dyson Swarm',       type:'CPS', p:8500,    c:1e7,     s:1.30 },
+        { id:'u10', n:'Wormhole Tech',     type:'CPC', p:40000,   c:1.5e8,   s:1.32 },
+        { id:'u11', n:'Galactic Filament', type:'CPS', p:1.2e5,   c:2e9,     s:1.35 },
+        { id:'u12', n:'Event Horizon',     type:'CPC', p:1e6,     c:5e10,    s:1.38 },
+        { id:'u13', n:'Dark Matter',       type:'CPS', p:1.5e7,   c:8e11,    s:1.40 },
+        { id:'u14', n:'Void Engine',       type:'CPC', p:2.5e8,   c:1e13,    s:1.42 },
+        { id:'u15', n:'Time Dilation',     type:'MULT',p:1.5,     c:1e15,    s:5, isMidas:true },
+        { id:'u16', n:'Omega Point',       type:'CPS', p:1e12,    c:1e18,    s:1.45 },
+        { id:'u17', n:'Reality Anchor',    type:'CPC', p:5e14,    c:1e21,    s:1.50 },
+        { id:'u18', n:'Midas Touch',       type:'MULT',p:3,       c:1e25,    s:10, isMidas:true }
     ];
 
     let S = {
-        score:0, cps:0, cpc:1, crit:0.05, rebirths:0, currentRB:0,
-        midasMult:1, currentTab:'upgrades', buyMult:1,
-        upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c})),
-        perks: []
+        score:0, cps:0, cpc:1, rebirths:0, midasMult:1, buyMult:1,
+        upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c}))
     };
 
     const getStats = () => {
-        const rbMult = 1 + (S.rebirths * 0.8);
+        const rbMult = 1 + (S.rebirths * 1.0);
         const gMult = rbMult * S.midasMult;
-        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, crit: S.crit, gMult };
+        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, gMult };
     };
 
     const refresh = () => {
@@ -176,17 +183,17 @@ const App = (() => {
         document.getElementById('st-cpc').innerText = fmt(st.eCpc);
         document.getElementById('st-mult').innerText = '×' + st.gMult.toFixed(1);
 
-        S.upgrades.forEach(u => {
+        S.upgrades.forEach((u, i) => {
             const el = document.getElementById('card-' + u.id);
             if (!el) return;
-            const def = BASE_UPGRADES.find(x=>x.id===u.id);
+            const def = BASE_UPGRADES[i];
             el.classList.toggle('locked', S.score < u.c);
             el.querySelector('.cell-price').innerText = fmt(u.c);
             el.querySelector('.card-lvl').innerText = 'LVL ' + u.lvl;
-            el.querySelector('.cell-total').innerText = (def.type === 'MULT' ? '×' : '+') + fmt(def.p * u.lvl);
+            el.querySelector('.cell-total').innerText = (def.type==='MULT'?'×':'+') + fmt(def.p * u.lvl);
         });
-        
-        const rbG = S.score >= 1e6 ? Math.floor(Math.log10(S.score/1e5)) : 0;
+
+        const rbG = S.score >= 1e7 ? Math.floor(Math.pow(S.score/1e6, 0.4)) : 0;
         document.getElementById('rebirth-btn').innerText = `REBIRTH (+${rbG} RB)`;
         document.getElementById('rebirth-btn').disabled = rbG <= 0;
     };
@@ -202,8 +209,8 @@ const App = (() => {
             card.innerHTML = `
                 <div class="card-inner">
                     <div class="card-top"><span class="card-name">${def.n}</span><span class="card-lvl">LVL 0</span></div>
-                    <div class="stat-row">
-                        <div class="data-line"><span class="d-label">Per Upgrade</span><span class="d-val boost">+${fmt(def.p)} ${def.type}</span></div>
+                    <div class="stat-stack">
+                        <div class="data-line"><span class="d-label">Per Level</span><span class="d-val boost">+${fmt(def.p)} ${def.type}</span></div>
                         <div class="data-line"><span class="d-label">Total Impact</span><span class="d-val total cell-total">0</span></div>
                     </div>
                     <div class="data-line" style="margin-top:auto"><span class="d-label">Price</span><span class="d-val price cell-price">0</span></div>
@@ -220,9 +227,9 @@ const App = (() => {
         for(let j=0; j<count; j++){
             if (S.score < u.c) break;
             S.score -= u.c; u.lvl++;
-            if(def.type==='CPS') S.cps+=def.p;
-            if(def.type==='CPC') S.cpc+=def.p;
-            if(def.type==='MULT') S.midasMult*=def.p;
+            if(def.type==='CPS') S.cps += def.p;
+            if(def.type==='CPC') S.cpc += def.p;
+            if(def.type==='MULT') S.midasMult *= def.p;
             u.c *= def.s;
             if(S.buyMult !== 'MAX' && j === count-1) break;
         }
@@ -230,22 +237,37 @@ const App = (() => {
     };
 
     return {
-        click: () => { S.score += getStats().eCpc; refresh(); },
-        setTab: t => { S.currentTab = t; renderShop(); },
-        setMult: m => { 
-            S.buyMult = m; 
+        click: e => {
+            const st = getStats();
+            S.score += st.eCpc;
+            
+            // Ripple Logic
+            const rip = document.createElement('div');
+            rip.className = 'ripple';
+            rip.style.left = e.clientX + 'px';
+            rip.style.top = e.clientY + 'px';
+            document.body.appendChild(rip);
+            setTimeout(() => rip.remove(), 600);
+            
+            refresh();
+        },
+        setMult: m => {
+            S.buyMult = m;
             document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
         },
         rebirth: () => {
-            const rbG = Math.floor(Math.log10(S.score/1e5));
-            if(rbG > 0) { S.rebirths += rbG; S.score=0; S.cps=0; S.cpc=1; S.upgrades.forEach((u,i)=> { u.lvl=0; u.c=BASE_UPGRADES[i].c; }); renderShop(); }
+            const rbG = Math.floor(Math.pow(S.score/1e6, 0.4));
+            if(rbG > 0) {
+                S.rebirths += rbG; S.score=0; S.cps=0; S.cpc=1; S.midasMult=1;
+                S.upgrades.forEach((u,i)=> { u.lvl=0; u.c=BASE_UPGRADES[i].c; });
+                renderShop();
+            }
         },
-        init: () => { 
-            renderShop(); 
-            setInterval(() => { S.score += getStats().eCps/10; refresh(); }, 100); 
-        },
-        toggleMusic: () => {} // Lightweight version
+        init: () => {
+            renderShop();
+            setInterval(() => { S.score += getStats().eCps / 10; refresh(); }, 100);
+        }
     };
 })();
 window.onload = () => App.init();

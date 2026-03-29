@@ -3,207 +3,336 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Fast Start</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Trenton Ascended: The Overdrive</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
-        --dark-bg: #05070a;
-        --glass-bg: rgba(255, 255, 255, 0.03);
-        --glass-border: rgba(255, 255, 255, 0.08);
+        --bg: #030508;
         --accent: #00d2ff;
-        --rebirth-color: #9b59b6;
-        --cost-color: #2ecc71;
-        --text-primary: #e6edf3;
-        --fira-font: 'Fira Code', monospace;
+        --glass: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --rebirth: #a29bfe;
+        --overdrive: #ff4757;
+        --success: #00ff88;
+        --fira: 'Fira Code', monospace;
     }
 
     body, html { 
-        font-family: var(--fira-font);
-        margin: 0; padding: 0; height: 100%;
-        color: var(--text-primary);
-        background: var(--dark-bg);
-        display: flex; flex-direction: column;
-        overflow: hidden;
+        margin: 0; padding: 0; height: 100%; font-family: var(--fira);
+        background: var(--bg); color: #e6edf3; overflow: hidden;
     }
 
-    #snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-    .snowflake { position: absolute; top: -10%; color: white; border-radius: 50%; pointer-events: none; animation: fall linear infinite; }
+    #snow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.6; }
     @keyframes fall { to { transform: translateY(110vh); } }
 
-    #game-layout { display: grid; grid-template-columns: 1fr 450px; height: calc(100% - 120px); width: 100vw; }
+    /* Save Slots UI */
+    #save-header {
+        position: fixed; top: 10px; left: 10px; display: flex; gap: 10px; z-index: 100;
+    }
+    .save-slot {
+        padding: 5px 15px; background: var(--glass); border: 1px solid var(--glass-border);
+        border-radius: 5px; cursor: pointer; font-size: 0.7rem; transition: 0.2s;
+    }
+    .save-slot.active { border-color: var(--accent); background: rgba(0, 210, 255, 0.1); }
 
-    #main-content { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; position: relative;}
+    #game { display: grid; grid-template-columns: 1fr 420px; height: calc(100vh - 100px); }
+
+    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    h1 { font-size: 2.2rem; color: var(--accent); letter-spacing: 4px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--accent)); }
     
-    .header-group h1 { color: var(--accent); font-size: 2.5rem; margin: 0; letter-spacing: 2px; }
-    .rebirth-stat { color: var(--rebirth-color); font-weight: bold; margin-bottom: 20px; }
-
-    #clickable-image {
-        cursor: pointer; width: 200px; height: 200px; object-fit: cover; border-radius: 50%;
-        box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); transition: all 0.05s; border: 3px solid var(--accent);
-        user-select: none;
+    #trenton {
+        width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
+        border: 2px solid var(--accent); cursor: pointer; transition: 0.05s;
+        box-shadow: 0 0 30px rgba(0, 210, 255, 0.15); user-select: none;
     }
-    #clickable-image:active { transform: scale(0.92); filter: brightness(1.3); }
+    #trenton:active { transform: scale(0.94); filter: brightness(1.4); }
 
-    #score-container {
-        background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px;
-        padding: 15px 40px; margin-top: 25px; font-size: 3rem; backdrop-filter: blur(10px);
+    /* The Button Mechanic */
+    #the-button {
+        position: absolute; top: 20%; right: 10%; width: 100px; height: 100px;
+        background: radial-gradient(circle, #ff4757, #b33939);
+        border: 4px solid #fff; border-radius: 50%; cursor: pointer;
+        display: none; box-shadow: 0 0 20px var(--overdrive);
+        font-weight: bold; color: white; align-items: center; justify-content: center;
+        text-align: center; font-size: 0.8rem; animation: pulse 1s infinite;
     }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-    /* Upgrades Sidebar */
-    #upgrades-panel {
-        background: rgba(0, 0, 0, 0.5); border-left: 1px solid var(--glass-border);
-        padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
-    }
-
-    .upgrade-card {
-        background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px;
-        padding: 10px; cursor: pointer; transition: 0.2s; position: relative;
-    }
-    .upgrade-card:hover:not(.disabled) { background: rgba(255,255,255,0.07); border-color: var(--accent); }
-    .upgrade-card.disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-
-    .upgrade-title { color: var(--accent); font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between;}
-    .upgrade-cost { color: var(--cost-color); font-weight: bold; font-size: 0.85rem; }
-
-    /* Tooltip / Info Box */
-    #info-box {
-        position: absolute; bottom: 20px; left: 20px; width: 250px;
-        background: rgba(0, 0, 0, 0.8); border: 1px solid var(--accent);
-        padding: 15px; border-radius: 10px; font-size: 0.8rem; text-align: left;
-        backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    #score-box { 
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 10px 40px;
+        margin-top: 30px; border-radius: 50px; font-size: 2.8rem; backdrop-filter: blur(10px);
     }
 
+    #rebirth-container { margin-top: 20px; width: 280px; text-align: center; }
     #rebirth-btn {
-        margin-top: 20px; padding: 12px; background: var(--rebirth-color); color: white;
-        border: none; border-radius: 8px; cursor: pointer; font-family: var(--fira-font);
-        font-weight: bold; width: 100%; transition: 0.3s;
+        width: 100%; padding: 12px; background: var(--rebirth); border: none; border-radius: 8px;
+        color: white; font-family: var(--fira); font-weight: bold; cursor: pointer; transition: 0.3s;
+        position: relative; overflow: hidden;
     }
-    #rebirth-btn:disabled { background: #333; opacity: 0.5; cursor: not-allowed; }
+    #rebirth-btn:disabled { background: #222; opacity: 0.5; cursor: not-allowed; }
+    #rb-progress { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.3s; }
 
-    #stats-panel {
-        background: rgba(0, 0, 0, 0.8); border-top: 1px solid var(--glass-border);
-        height: 120px; display: flex; justify-content: space-around; align-items: center;
+    /* Unique Mechanic: Resonance */
+    #resonance-bar {
+        width: 280px; height: 10px; background: #111; margin-top: 15px; border-radius: 5px;
+        display: none; overflow: hidden; border: 1px solid var(--glass-border);
     }
-    .stat-box span { color: var(--accent); font-weight: bold; font-size: 1.4rem; }
+    #resonance-fill { height: 100%; width: 0%; background: var(--success); transition: width 0.1s; }
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    #shop { 
+        background: rgba(0,0,0,0.3); border-left: 1px solid var(--glass-border); 
+        padding: 20px; overflow-y: scroll; display: flex; flex-direction: column; gap: 10px;
+    }
+    .card {
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 12px;
+        border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
+    }
+    .card:hover:not(.locked) { background: rgba(255,255,255,0.06); border-color: var(--accent); }
+    .card.locked { opacity: 0.25; cursor: not-allowed; }
+    .u-name { font-weight: bold; color: var(--accent); font-size: 0.9rem; }
+    .u-cost { color: var(--success); font-size: 0.8rem; margin-top: 4px; }
+
+    #hud {
+        position: absolute; bottom: 20px; left: 20px; width: 280px; height: 120px;
+        background: rgba(0,0,0,0.8); border: 1px solid var(--accent); border-radius: 12px;
+        padding: 15px; font-size: 0.8rem; pointer-events: none; opacity: 0; transition: 0.2s;
+    }
+
+    #stats { 
+        height: 100px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(15px);
+    }
+    .stat span { color: var(--accent); font-weight: bold; font-size: 1.3rem; }
+    .stat label { font-size: 0.7rem; color: #8b949e; display: block; }
 </style>
 </head>
 <body>
 
-<div id="snow-container"></div>
-
-<div id="game-layout">
-    <div id="main-content">
-        <div id="info-box">Hover an upgrade for info...</div>
-        <div class="header-group">
-            <h1>TRENTON ASCENDED</h1>
-            <div class="rebirth-stat" id="rebirth-mult">Rebirth Multiplier: 1.0x</div>
-        </div>
-        <img id="clickable-image" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="Game.click(event)">
-        <div id="score-container">0 Power</div>
-        <div style="width: 250px;">
-            <button id="rebirth-btn" onclick="Game.rebirth()" disabled>REBIRTH (100K)</button>
-        </div>
-    </div>
-    <div id="upgrades-panel"></div>
+<div id="save-header">
+    <div class="save-slot active" onclick="App.switchSlot(0)">Slot 1</div>
+    <div class="save-slot" onclick="App.switchSlot(1)">Slot 2</div>
+    <div class="save-slot" onclick="App.switchSlot(2)">Slot 3</div>
 </div>
 
-<div id="stats-panel">
-    <div class="stat-box"><label>CPS</label><br><span id="st-cps">0</span></div>
-    <div class="stat-box"><label>CPC</label><br><span id="st-cpc">1</span></div>
-    <div class="stat-box"><label>CRIT</label><br><span id="st-crit">5%</span></div>
+<div id="snow"></div>
+
+<div id="game">
+    <div id="main">
+        <div id="hud">Hover for details...</div>
+        <div id="the-button" onclick="App.activateOverdrive()">THE BUTTON</div>
+        <h1>TRENTON ASCENDED</h1>
+        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        <div id="score-box">0</div>
+        
+        <div id="resonance-bar"><div id="resonance-fill"></div></div>
+        <div id="rebirth-container">
+            <button id="rebirth-btn" onclick="App.rebirth()" disabled>
+                REBIRTH: <span id="rb-cost-text">100K</span>
+                <div id="rb-progress" style="width: 0%"></div>
+            </button>
+            <div style="font-size: 0.7rem; margin-top: 8px; color: var(--rebirth);" id="rb-mult">Mult: 1.0x (0 RB)</div>
+        </div>
+    </div>
+    <div id="shop"></div>
+</div>
+
+<div id="stats">
+    <div class="stat"><label>POWER / SEC</label><span id="st-cps">0</span></div>
+    <div class="stat"><label>POWER / CLICK</label><span id="st-cpc">1</span></div>
+    <div class="stat"><label>CRITICAL HIT</label><span id="st-crit">5%</span></div>
 </div>
 
 <script>
-    const Game = (() => {
-        let score = 0;
-        let tCps = 0, tCpc = 1, rebirths = 0, crit = 0.05;
-        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx"];
+    const App = (() => {
+        let state = {
+            slot: 0,
+            score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05,
+            rebirthCost: 100000, resonance: 0,
+            upgrades: []
+        };
+
+        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qn"];
+        let overdriveActive = false;
+        let overdriveTimer = 0;
+
+        const baseUpgrades = [
+            { id: 'm', n: 'Mass Gain', d: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.15 },
+            { id: 's', n: 'Strength Gain', d: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.2 },
+            { id: 'sh', n: 'Shit Power', d: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.25 },
+            { id: 'n', n: 'Neural Pulse', d: '+40 CPS', cps: 40, c: 1200, s: 1.28 },
+            { id: 'cr', n: 'Focus Aura', d: '+3% Crit', cr: 0.03, c: 4500, s: 1.35 },
+            { id: 'q', n: 'Quantum Lift', d: '+100 CPC', cpc: 100, c: 15000, s: 1.3 },
+            { id: 'g', n: 'Gravity Well', d: '+500 CPS', cps: 500, c: 60000, s: 1.3 },
+            { id: 'nb', n: 'Nano-Repair', d: '+1.5K CPS / +500 CPC', cps: 1500, cpc: 500, c: 200000, s: 1.32 },
+            { id: 'cy', n: 'Cyber Frame', d: '+8K CPS', cps: 8000, c: 1000000, s: 1.35 },
+            { id: 'v', n: 'Void Breath', d: '+20K CPC', cpc: 20000, c: 8000000, s: 1.35 },
+            { id: 'sl', n: 'Solar Core', d: '+100K CPS', cps: 100000, c: 50000000, s: 1.4 },
+            { id: 'at', n: 'Atomic Grip', d: '+500K CPC', cpc: 500000, c: 500000000, s: 1.4 },
+            { id: 'ga', n: 'Galaxy Mind', d: '+2M CPS', cps: 2000000, c: 5000000000, s: 1.42 },
+            { id: 'ti', n: 'Timeless Muscle', d: '+10M CPC', cpc: 10000000, c: 75000000000, s: 1.45 },
+            { id: 'ds', n: 'Reality Anchor', d: '+100M CPS', cps: 100000000, c: 1000000000000, s: 1.5 },
+            { id: 'mu', n: 'Multiversal Body', d: '+5B CPS / +1B CPC', cps: 5000000000, cpc: 1000000000, c: 50000000000000, s: 1.55 },
+            { id: 'sg', n: 'The Singularity', d: 'Final Evolution.', cps: 50000000000, cpc: 10000000000, c: 1000000000000000, s: 1.6 }
+        ];
 
         const format = (n) => {
             if (n < 1000) return Math.floor(n);
             const e = Math.floor(Math.log10(n) / 3);
-            return (n / Math.pow(10, e * 3)).toFixed(2) + suffixes[e];
+            return (n / Math.pow(10, e * 3)).toFixed(2) + (suffixes[e] || "??");
         };
 
-        const upData = [
-            { id: 'm', n: 'Mass Gain', d: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.2 },
-            { id: 's', n: 'Strength Gain', d: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.25 },
-            { id: 'sh', n: 'Shit Power', d: '+5 CPS / +5 CPC', cps: 5, cpc: 5, c: 200, s: 1.3 },
-            { id: 'n', n: 'Neural Overclock', d: '+25 CPS', cps: 25, cpc: 0, c: 1000, s: 1.35 },
-            { id: 'cr', n: 'Focus Training', d: '+3% Crit Chance', cps: 0, cpc: 0, cr: 0.03, c: 3000, s: 1.4 },
-            { id: 'q', n: 'Quantum Biceps', d: '+60 CPC', cps: 0, cpc: 60, c: 8000, s: 1.4 },
-            { id: 'g', n: 'Gravity Pull', d: '+200 CPS', cps: 200, cpc: 0, c: 20000, s: 1.45 },
-            { id: 'nb', n: 'Nanobot Blood', d: '+500 CPS/CPC', cps: 500, cpc: 500, c: 75000, s: 1.5 },
-            { id: 'cy', n: 'Cyber Spine', d: '+2K CPS', cps: 2000, cpc: 0, c: 250000, s: 1.5 },
-            { id: 'v', n: 'Void Lung', d: '+5K CPC', cps: 0, cpc: 5000, c: 1000000, s: 1.55 },
-            { id: 'sol', n: 'Solar Synth', d: '+25K CPS', cps: 25000, cpc: 0, c: 5000000, s: 1.6 }
-        ];
-
-        const panel = document.getElementById('upgrades-panel');
-        const info = document.getElementById('info-box');
-
-        upData.forEach((u, i) => {
-            const card = document.createElement('div');
-            card.className = 'upgrade-card disabled';
-            card.id = `up-${u.id}`;
-            card.innerHTML = `<div class="upgrade-title"><span>${u.n}</span> <span id="l-${u.id}">0</span></div><div class="upgrade-cost">Cost: <span id="c-${u.id}">${format(u.c)}</span></div>`;
-            card.onclick = () => buy(i);
-            card.onmouseenter = () => { info.style.opacity = 1; info.innerHTML = `<strong>${u.n}</strong><br>${u.d}<br><br>Level: ${u.lvl}`; };
-            card.onmouseleave = () => { info.style.opacity = 0; };
-            u.lvl = 0; u.baseC = u.c;
-            panel.appendChild(card);
-        });
+        const initShop = () => {
+            const shop = document.getElementById('shop');
+            shop.innerHTML = '';
+            state.upgrades.forEach((u, i) => {
+                const el = document.createElement('div');
+                el.className = 'card locked';
+                el.id = `u-${u.id}`;
+                el.innerHTML = `<div class="card-info"><span class="u-name">${u.n}</span><span class="u-cost" id="c-${u.id}">${format(u.c)}</span></div><div class="u-lvl" id="l-${u.id}">${u.lvl}</div>`;
+                el.onclick = () => buy(i);
+                el.onmouseenter = () => { 
+                    const hud = document.getElementById('hud');
+                    hud.style.opacity = 1; 
+                    hud.innerHTML = `<strong>${u.n}</strong><br>${u.d}<br><br>Tier: ${i+1} | Level: ${u.lvl}`; 
+                };
+                el.onmouseleave = () => document.getElementById('hud').style.opacity = 0;
+                shop.appendChild(el);
+            });
+        };
 
         const buy = (i) => {
-            const u = upData[i];
-            if (score >= u.c) {
-                score -= u.c; u.lvl++;
-                if(u.cps) tCps += u.cps; if(u.cpc) tCpc += u.cpc; if(u.cr) crit += u.cr;
-                u.c *= u.s; refresh();
+            const u = state.upgrades[i];
+            if (state.score >= u.c) {
+                state.score -= u.c; u.lvl++;
+                if (u.cps) state.cps += u.cps; 
+                if (u.cpc) state.cpc += u.cpc; 
+                if (u.cr) state.crit += u.cr;
+                u.c *= u.s; 
+                refresh();
+                save();
             }
         };
 
         const refresh = () => {
-            const m = 1 + (rebirths * 0.5);
-            document.getElementById('score-container').innerText = format(score) + " Power";
-            document.getElementById('st-cps').innerText = format(tCps * m);
-            document.getElementById('st-cpc').innerText = format(tCpc * m);
-            document.getElementById('st-crit').innerText = Math.round(crit * 100) + "%";
-            document.getElementById('rebirth-mult').innerText = `Multiplier: ${m.toFixed(1)}x (Rebirths: ${rebirths})`;
+            let m = 1 + (state.rebirths * 0.5);
+            
+            // Unique Mechanic: Resonance (1+ Rebirth)
+            if (state.rebirths >= 1) {
+                document.getElementById('resonance-bar').style.display = 'block';
+                const resonanceBonus = 1 + (state.resonance / 100);
+                m *= resonanceBonus;
+            }
 
-            upData.forEach(u => {
+            // The Button Mechanic (5+ Rebirths)
+            const btn = document.getElementById('the-button');
+            if (state.rebirths >= 5) {
+                btn.style.display = 'flex';
+                if (overdriveActive) {
+                    m *= 5;
+                    btn.style.boxShadow = "0 0 50px white";
+                    btn.innerText = "ACTIVE!";
+                } else {
+                    btn.innerText = "THE BUTTON";
+                }
+            }
+
+            document.getElementById('score-box').innerText = format(state.score);
+            document.getElementById('st-cps').innerText = format(state.cps * m);
+            document.getElementById('st-cpc').innerText = format(state.cpc * m);
+            document.getElementById('st-crit').innerText = Math.round(state.crit * 100) + "%";
+            document.getElementById('rb-mult').innerText = `Mult: ${m.toFixed(1)}x (${state.rebirths} RB)`;
+            document.getElementById('rb-cost-text').innerText = format(state.rebirthCost);
+            
+            const prog = Math.min((state.score / state.rebirthCost) * 100, 100);
+            document.getElementById('rb-progress').style.width = prog + "%";
+
+            state.upgrades.forEach(u => {
                 document.getElementById(`c-${u.id}`).innerText = format(u.c);
                 document.getElementById(`l-${u.id}`).innerText = u.lvl;
-                score >= u.c ? document.getElementById(`up-${u.id}`).classList.remove('disabled') : document.getElementById(`up-${u.id}`).classList.add('disabled');
+                const card = document.getElementById(`u-${u.id}`);
+                state.score >= u.c ? card.classList.remove('locked') : card.classList.add('locked');
             });
 
-            const rBtn = document.getElementById('rebirth-btn');
-            rBtn.disabled = score < 100000;
+            document.getElementById('rebirth-btn').disabled = state.score < state.rebirthCost;
         };
 
-        setInterval(() => { score += (tCps * (1 + rebirths * 0.5)) / 10; refresh(); }, 100);
+        const save = () => localStorage.setItem(`trenton_save_${state.slot}`, JSON.stringify(state));
+
+        const load = (slot) => {
+            const data = localStorage.getItem(`trenton_save_${slot}`);
+            if (data) {
+                state = JSON.parse(data);
+            } else {
+                state = {
+                    slot: slot, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05,
+                    rebirthCost: 100000, resonance: 0,
+                    upgrades: baseUpgrades.map(u => ({...u, lvl: 0}))
+                };
+            }
+            initShop();
+            refresh();
+            
+            document.querySelectorAll('.save-slot').forEach((s, i) => {
+                s.classList.toggle('active', i === slot);
+            });
+        };
+
+        setInterval(() => { 
+            let m = 1 + (state.rebirths * 0.5);
+            if (state.rebirths >= 1) m *= (1 + (state.resonance / 100));
+            if (overdriveActive) {
+                m *= 5;
+                overdriveTimer--;
+                if (overdriveTimer <= 0) overdriveActive = false;
+            }
+            state.score += (state.cps * m) / 10; 
+            refresh(); 
+        }, 100);
+
+        // Auto-save every 10 seconds
+        setInterval(save, 10000);
 
         return {
-            click: () => { score += tCpc * (1 + rebirths * 0.5) * (Math.random() < crit ? 5 : 1); refresh(); },
+            click: () => { 
+                let m = 1 + (state.rebirths * 0.5);
+                if (state.rebirths >= 1) {
+                    m *= (1 + (state.resonance / 100));
+                    state.resonance = Math.min(state.resonance + 0.1, 100);
+                    document.getElementById('resonance-fill').style.width = state.resonance + "%";
+                }
+                if (overdriveActive) m *= 5;
+                state.score += state.cpc * m * (Math.random() < state.crit ? 5 : 1); 
+                refresh(); 
+            },
             rebirth: () => {
-                if (score >= 100000) {
-                    rebirths++; score = 0; tCps = 0; tCpc = 1; crit = 0.05;
-                    upData.forEach(u => { u.lvl = 0; u.c = u.baseC; });
+                if (state.score >= state.rebirthCost) {
+                    state.rebirths++;
+                    state.rebirthCost *= 1.7;
+                    state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05; state.resonance = 0;
+                    state.upgrades.forEach(u => { u.lvl = 0; u.c = baseUpgrades.find(b => b.id === u.id).c; });
+                    initShop();
                     refresh();
+                    save();
+                }
+            },
+            switchSlot: (n) => { save(); load(n); },
+            activateOverdrive: () => {
+                if (!overdriveActive) {
+                    overdriveActive = true;
+                    overdriveTimer = 100; // 10 seconds at 100ms interval
                 }
             }
         };
     })();
 
-    const snow = document.getElementById('snow-container');
+    // Initial Load
+    App.switchSlot(0);
+
+    const snow = document.getElementById('snow');
     for (let i = 0; i < 40; i++) {
-        const f = document.createElement('div'); f.className = 'snowflake';
-        f.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*4+3}s;opacity:${Math.random()}`;
+        const f = document.createElement('div'); f.className = 'flake';
+        f.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;`;
         snow.appendChild(f);
     }
 </script>

@@ -22,6 +22,8 @@
     /* LEFT PANEL */
     #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
     
+    h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 30px rgba(0,210,255,0.5); text-transform: uppercase; }
+
     #trenton-container { position: relative; cursor: pointer; user-select: none; }
     #trenton {
         width: 260px; height: 260px; border-radius: 50%; object-fit: cover;
@@ -36,7 +38,6 @@
         border: 2px solid var(--accent); animation: ripple-out 0.6s ease-out forwards;
         transform: translate(-50%, -50%); z-index: 50;
     }
-    .ripple.crit { border-color: var(--crit); border-width: 4px; box-shadow: 0 0 15px var(--crit); }
     @keyframes ripple-out {
         0% { width: 0; height: 0; opacity: 1; }
         100% { width: 150px; height: 150px; opacity: 0; }
@@ -47,6 +48,10 @@
         margin-top: 30px; border-radius: 15px; font-size: 3rem; font-weight: 700;
         backdrop-filter: blur(10px); text-align: center; color: #fff;
     }
+
+    /* MUSIC BUTTON */
+    #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); }
+    #music-btn.playing { color: var(--success); border-color: var(--success); }
 
     /* SIDEBAR & TABS */
     #shop-container { background: #05070a; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
@@ -67,7 +72,7 @@
 
     #shop-list { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 
-    /* UPGRADE CARDS (NO CUTOFF) */
+    /* UPGRADE CARDS */
     .card {
         width: 100%; min-height: 180px; border-radius: 12px; cursor: pointer; transition: 0.2s;
         position: relative; background: #0f1419; border: 1px solid #21262d;
@@ -104,7 +109,9 @@
 <body>
 
 <div id="game">
+    <button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
     <div id="main">
+        <h1>TRENTON ASCENDED</h1>
         <div id="trenton-container" onclick="App.click(event)">
             <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton">
         </div>
@@ -143,7 +150,6 @@ const App = (() => {
         return (n / Math.pow(10, e * 3)).toFixed(2) + SFX[e];
     };
 
-    // EXPANDED UPGRADE LIST (18 Tiers)
     const BASE_UPGRADES = [
         { id:'u1',  n:'Muscle Fiber',      type:'CPC', p:2,       c:15,      s:1.15 },
         { id:'u2',  n:'Auto-Clicker',      type:'CPS', p:1,       c:100,     s:1.16 },
@@ -169,6 +175,8 @@ const App = (() => {
         score:0, cps:0, cpc:1, rebirths:0, midasMult:1, buyMult:1,
         upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c}))
     };
+
+    let audioCtx=null, musicPlaying=false, stopFns=[];
 
     const getStats = () => {
         const rbMult = 1 + (S.rebirths * 1.0);
@@ -238,23 +246,26 @@ const App = (() => {
 
     return {
         click: e => {
-            const st = getStats();
-            S.score += st.eCpc;
-            
-            // Ripple Logic
+            S.score += getStats().eCpc;
             const rip = document.createElement('div');
-            rip.className = 'ripple';
-            rip.style.left = e.clientX + 'px';
-            rip.style.top = e.clientY + 'px';
-            document.body.appendChild(rip);
-            setTimeout(() => rip.remove(), 600);
-            
+            rip.className = 'ripple'; rip.style.left = e.clientX + 'px'; rip.style.top = e.clientY + 'px';
+            document.body.appendChild(rip); setTimeout(() => rip.remove(), 600);
             refresh();
         },
         setMult: m => {
             S.buyMult = m;
             document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
+        },
+        toggleMusic: () => {
+            if(musicPlaying) { stopFns.forEach(f=>f()); musicPlaying=false; document.getElementById('music-btn').innerText='♪ MUSIC OFF'; document.getElementById('music-btn').classList.remove('playing'); return; }
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const m = audioCtx.createGain(); m.gain.value=0.08; m.connect(audioCtx.destination);
+            const o1 = audioCtx.createOscillator(); o1.type='sine'; o1.frequency.value=110; o1.connect(m);
+            const o2 = audioCtx.createOscillator(); o2.type='sine'; o2.frequency.value=165; o2.connect(m);
+            o1.start(); o2.start();
+            stopFns = [()=>o1.stop(), ()=>o2.stop(), ()=>m.disconnect()];
+            musicPlaying=true; document.getElementById('music-btn').innerText='♪ MUSIC ON'; document.getElementById('music-btn').classList.add('playing');
         },
         rebirth: () => {
             const rbG = Math.floor(Math.pow(S.score/1e6, 0.4));

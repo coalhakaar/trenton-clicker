@@ -17,7 +17,7 @@
         --crit: #ff4757;
         --final: #ff00ff;
         --fira: 'Fira Code', monospace;
-        --warn: #ff9f43;
+        --sidebar-w: 580px;
     }
     *, *::before, *::after { box-sizing: border-box; }
     body, html { margin:0; padding:0; height:100%; font-family:var(--fira); background:var(--bg); color:#e6edf3; overflow:hidden; }
@@ -25,25 +25,41 @@
     .flake { position:absolute; top:-10%; background:white; border-radius:50%; animation:fall linear infinite; opacity:0.15; }
     @keyframes fall { to { transform:translateY(110vh); } }
 
-    #game { display:grid; grid-template-columns:1fr 460px; height:100vh; }
+    #game { display:grid; grid-template-columns:1fr var(--sidebar-w); height:100vh; }
 
-    /* ── LEFT PANEL ── */
+    /* LEFT PANEL */
     #main { display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; padding-bottom:90px; }
     h1 { font-size:1.6rem; color:var(--accent); letter-spacing:4px; margin-bottom:14px; text-align:center; text-shadow:0 0 20px rgba(0,210,255,0.4); }
 
+    /* CLICK WRAP + RIPPLE */
+    #click-wrap { position:relative; display:inline-block; }
     #trenton {
         width:220px; height:220px; border-radius:50%; object-fit:cover;
-        border:3px solid var(--accent); cursor:pointer; transition:0.05s;
-        box-shadow:0 0 50px rgba(0,210,255,0.15); user-select:none;
+        border:3px solid var(--accent); cursor:pointer; transition:transform 0.05s, filter 0.05s;
+        box-shadow:0 0 50px rgba(0,210,255,0.15); user-select:none; display:block;
     }
     #trenton:active { transform:scale(0.91); filter:brightness(1.6); }
 
+    .ripple {
+        position:absolute; border-radius:50%; pointer-events:none;
+        animation:ripple-out 0.65s ease-out forwards;
+        border:2px solid var(--accent);
+        transform:translate(-50%,-50%) scale(0);
+    }
+    .ripple.crit { border-color:var(--crit); border-width:3px; box-shadow:0 0 12px var(--crit); }
+    @keyframes ripple-out {
+        0%   { transform:translate(-50%,-50%) scale(0); opacity:0.9; }
+        100% { transform:translate(-50%,-50%) scale(4.5); opacity:0; }
+    }
+
+    /* SCORE */
     #score-box {
         background:var(--glass); border:1px solid var(--glass-border);
         padding:10px 28px; margin-top:22px; border-radius:60px;
         font-size:2.4rem; backdrop-filter:blur(15px); min-width:230px; text-align:center;
     }
 
+    /* REBIRTH */
     #rebirth-section { width:290px; margin-top:16px; display:flex; flex-direction:column; gap:8px; }
     #rebirth-btn {
         width:100%; padding:13px; background:linear-gradient(135deg, var(--rebirth), #6c5ce7);
@@ -60,9 +76,19 @@
     }
     #clear-btn:hover { border-color:#ff4757; color:#ff4757; }
 
-    /* ── STATS BAR ── */
+    /* MUSIC BUTTON */
+    #music-btn {
+        position:fixed; top:14px; left:14px; z-index:200;
+        background:rgba(0,0,0,0.6); border:1px solid var(--glass-border);
+        color:#555; padding:7px 14px; border-radius:6px; font-family:var(--fira);
+        font-size:0.65rem; cursor:pointer; transition:0.2s; letter-spacing:1px;
+    }
+    #music-btn:hover { color:var(--accent); border-color:var(--accent); }
+    #music-btn.playing { color:var(--success); border-color:rgba(0,255,136,0.5); }
+
+    /* STATS BAR */
     #stats {
-        position:fixed; bottom:0; left:0; width:calc(100% - 460px); height:85px;
+        position:fixed; bottom:0; left:0; width:calc(100% - var(--sidebar-w)); height:85px;
         background:rgba(0,0,0,0.92); border-top:1px solid var(--glass-border);
         display:flex; justify-content:space-around; align-items:center;
     }
@@ -70,74 +96,90 @@
     .stat label { font-size:0.55rem; color:#444; display:block; letter-spacing:2px; margin-bottom:3px; }
     .stat span { font-size:1rem; }
 
-    /* ── SIDEBAR ── */
+    /* SIDEBAR */
     #shop-container { background:rgba(0,0,0,0.65); border-left:1px solid var(--glass-border); display:flex; flex-direction:column; overflow:hidden; }
     #sidebar-header { display:flex; border-bottom:1px solid var(--glass-border); background:#000; flex-shrink:0; }
     .tab-btn {
-        flex:1; padding:14px 8px; border:none; background:transparent; color:#555;
-        cursor:pointer; font-family:var(--fira); font-weight:bold; font-size:0.7rem;
+        flex:1; padding:16px 8px; border:none; background:transparent; color:#555;
+        cursor:pointer; font-family:var(--fira); font-weight:bold; font-size:0.78rem;
         letter-spacing:1px; transition:0.2s; border-bottom:2px solid transparent;
     }
     .tab-btn.active { color:var(--accent); border-bottom:2px solid var(--accent); background:var(--glass); }
 
-    #shop-list { padding:16px; overflow-y:scroll; display:flex; flex-direction:column; gap:8px; flex:1; }
+    #shop-list { padding:14px 16px; overflow-y:scroll; display:flex; flex-direction:column; gap:10px; flex:1; }
 
-    /* ── CARDS ── */
+    /* CARDS */
     .card {
-        background:var(--glass); border:1px solid var(--glass-border); padding:12px 14px;
-        border-radius:10px; cursor:pointer; transition:0.18s; position:relative; overflow:hidden;
+        background:var(--glass); border:1px solid var(--glass-border); padding:13px 16px;
+        border-radius:12px; cursor:pointer; transition:background 0.15s, transform 0.15s;
+        position:relative; overflow:hidden;
     }
-    .card::before { content:''; position:absolute; left:0; top:0; height:100%; width:3px; background:var(--accent); }
+    .card::before {
+        content:''; position:absolute; left:0; top:0; height:100%; width:4px;
+        background:var(--accent); border-radius:4px 0 0 4px;
+    }
     .card:hover:not(.locked) { background:rgba(255,255,255,0.07); transform:translateX(-4px); }
     .card.is-midas::before { background:var(--midas); }
-    .card.is-midas { border-color:rgba(255,215,0,0.25); }
+    .card.is-midas { border-color:rgba(255,215,0,0.2); }
     .card.is-final::before { background:var(--final); }
-    .card.is-final { border-color:rgba(255,0,255,0.25); }
+    .card.is-final { border-color:rgba(255,0,255,0.2); }
     .card.is-perk::before { background:var(--rebirth); }
     .card.locked { opacity:0.18; cursor:not-allowed; filter:grayscale(1); }
 
-    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
-    .u-title { font-weight:700; color:#e6edf3; font-size:0.83rem; letter-spacing:0.5px; }
-    .u-lvl-badge { font-size:0.6rem; color:var(--accent); background:rgba(0,210,255,0.1); padding:2px 7px; border-radius:20px; }
-    .u-benefit { font-size:0.72rem; color:var(--success); margin-bottom:5px; }
-    .u-cost { font-size:0.75rem; color:#aaa; font-weight:bold; }
+    /* Card layout rows */
+    .card-row1 { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .u-title { font-weight:700; color:#e6edf3; font-size:0.92rem; }
+    .u-lvl-badge {
+        font-size:0.65rem; color:var(--accent); background:rgba(0,210,255,0.1);
+        padding:2px 10px; border-radius:20px; flex-shrink:0; white-space:nowrap;
+    }
+    .card-row2 { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:7px; }
+    .u-benefit { font-size:0.78rem; color:var(--success); font-weight:500; flex:1; }
+    .u-cost { font-size:0.78rem; color:#ccc; font-weight:bold; flex-shrink:0; white-space:nowrap; }
+    .card-row3 { border-top:1px solid rgba(255,255,255,0.05); padding-top:6px; }
+    .u-bought { font-size:0.67rem; color:#444; letter-spacing:0.5px; }
 
     .tier-label {
-        font-size:0.55rem; letter-spacing:3px; color:#333; text-transform:uppercase;
-        padding:4px 0 2px; text-align:center; border-top:1px solid #111; margin-top:4px;
+        font-size:0.6rem; letter-spacing:3px; color:#2a2a2a; text-transform:uppercase;
+        padding:5px 0 2px; text-align:center; border-top:1px solid #111; margin-top:4px;
     }
     .tier-label:first-child { border-top:none; margin-top:0; }
 
-    /* ── POPUP ── */
+    /* POPUP */
     .popup { position:fixed; pointer-events:none; animation:float-up 0.75s forwards; font-weight:bold; font-family:var(--fira); font-size:0.9rem; z-index:999; }
     @keyframes float-up { to { transform:translateY(-90px); opacity:0; } }
 
-    /* ── AUTOSAVE TOAST ── */
+    /* AUTOSAVE TOAST */
     #save-toast {
         position:fixed; bottom:95px; left:50%; transform:translateX(-50%) translateY(20px);
-        background:rgba(0,210,255,0.12); border:1px solid rgba(0,210,255,0.3);
+        background:rgba(0,210,255,0.1); border:1px solid rgba(0,210,255,0.3);
         color:var(--accent); padding:6px 16px; border-radius:30px; font-size:0.6rem;
-        letter-spacing:2px; opacity:0; transition:opacity 0.3s, transform 0.3s; z-index:100;
-        pointer-events:none;
+        letter-spacing:2px; opacity:0; transition:opacity 0.3s, transform 0.3s; z-index:100; pointer-events:none;
     }
     #save-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     ::-webkit-scrollbar { width:3px; }
-    ::-webkit-scrollbar-thumb { background:rgba(0,210,255,0.3); border-radius:2px; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,210,255,0.25); border-radius:2px; }
 </style>
 </head>
 <body>
 <div id="snow"></div>
 <div id="save-toast">AUTOSAVED</div>
+<button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
 
 <div id="game">
     <div id="main">
         <h1>TRENTON ASCENDED</h1>
-        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        <div id="click-wrap">
+            <img id="trenton"
+                 src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no"
+                 alt="Trenton"
+                 onclick="App.click(event)">
+        </div>
         <div id="score-box">0</div>
         <div id="rebirth-section">
             <button id="rebirth-btn" onclick="App.rebirth()" disabled>REBIRTH (+0 RB)</button>
-            <div id="rb-status">0 Total Rebirths &nbsp;|&nbsp; 0 RB Points Available</div>
+            <div id="rb-status">0 Total Rebirths &nbsp;|&nbsp; 0 RB Available</div>
             <button id="clear-btn" onclick="App.clearData()">⚠ CLEAR ALL DATA</button>
         </div>
     </div>
@@ -161,8 +203,6 @@
 <script>
 const App = (() => {
     const SAVE_KEY = 'trenton_ascended_v3';
-
-    /* ── SUFFIXES ── */
     const SFX = ["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","UDc","DDc","TDc","QaDc","QiDc","SxDc","SpDc","OcDc","NoDc","Vg","UVg","DVg","TVg","QaVg","QiVg","SxVg","SpVg","OcVg","NoVg","Tg"];
 
     const fmt = n => {
@@ -172,63 +212,48 @@ const App = (() => {
         return (n / Math.pow(10, e * 3)).toFixed(2) + SFX[e];
     };
 
-    /* ── UPGRADE TIERS ── */
-    // Carefully balanced: each tier is ~8-20x the previous tier's cost
-    // Organized from cheapest to most expensive
+    /* ── UPGRADES ── */
     const BASE_UPGRADES = [
-        // TIER 1 — Early Game (10 – 5K)
-        { tier:'TIER I — MORTAL', id:'m',   n:'Mass Gain',        b:'+1 CPS',                cps:1,         c:10,        s:1.15 },
-        { tier:null,              id:'s',   n:'Strength Training', b:'+3 CPC',                cpc:3,         c:50,        s:1.18 },
-        { tier:null,              id:'cr',  n:'Focus Aura',        b:'+3% Crit (cap 50%)',    cr:0.03,       c:200,       s:1.3  },
-        { tier:null,              id:'sh',  n:'Bio-Power',         b:'+10 CPS / +5 CPC',      cps:10,cpc:5,  c:800,       s:1.22 },
-        { tier:null,              id:'n',   n:'Neural Pulse',      b:'+40 CPS',               cps:40,        c:3000,      s:1.25 },
-
-        // TIER 2 — Adept (20K – 5M)
-        { tier:'TIER II — ADEPT', id:'q',  n:'Quantum Lift',      b:'+100 CPC',              cpc:100,       c:20000,     s:1.28 },
-        { tier:null,              id:'g',  n:'Gravity Well',      b:'+500 CPS',              cps:500,       c:100000,    s:1.3  },
-        { tier:null,              id:'nb', n:'Nano-Repair',        b:'+2K CPS / +1K CPC',     cps:2000,cpc:1000, c:600000, s:1.32 },
-        { tier:null,              id:'cy', n:'Cyber Frame',        b:'+12K CPS',              cps:12000,     c:4000000,   s:1.35 },
-
-        // TIER 3 — Elite (20M – 2B)
-        { tier:'TIER III — ELITE',id:'v',  n:'Void Breath',       b:'+40K CPC',              cpc:40000,     c:20000000,  s:1.38 },
-        { tier:null,              id:'sl', n:'Solar Synthesis',    b:'+120K CPS',             cps:120000,    c:120000000, s:1.4  },
-        { tier:null,              id:'ga', n:'Galaxy Mind',        b:'+2M CPS',               cps:2000000,   c:1000000000,s:1.42 },
-
-        // TIER 4 — Cosmic (10B – 5T)
-        { tier:'TIER IV — COSMIC',id:'ti', n:'Time Warp',         b:'+15M CPC',              cpc:15000000,  c:1e10,      s:1.45 },
-        { tier:null,              id:'cb', n:'Chrono-Buffer',      b:'+60M CPC',              cpc:60000000,  c:8e10,      s:1.45 },
-        { tier:null,              id:'dt', n:'Dimensional Tear',   b:'+200M CPS',             cps:2e8,       c:5e11,      s:1.48 },
-        { tier:null,              id:'af', n:'Antimatter Forge',   b:'+1.5B CPS',             cps:1.5e9,     c:6e12,      s:1.5  },
-
-        // TIER 5 — Universal (30T – 5Qa)
-        { tier:'TIER V — UNIVERSAL',id:'nc',n:'Neutron Core',     b:'+8B CPC',               cpc:8e9,       c:3e13,      s:1.52 },
-        { tier:null,              id:'eh', n:'Event Horizon',      b:'+100B CPS',             cps:1e11,      c:2e14,      s:1.55 },
-        { tier:null,              id:'dm', n:'Dark Infusion',      b:'+600B CPS',             cps:6e11,      c:2e15,      s:1.55 },
-        { tier:null,              id:'uc', n:'Universal Constant', b:'+3T CPC',               cpc:3e12,      c:1.5e16,    s:1.58 },
-
-        // TIER 6 — Omniversal (100Qa+)
-        { tier:'TIER VI — OMNIVERSAL',id:'cbg',n:'Cosmic Background',b:'+40T CPS',           cps:4e13,      c:2e17,      s:1.6  },
-        { tier:null,              id:'ta', n:'The Great Attractor', b:'+300T CPS',            cps:3e14,      c:2e18,      s:1.62 },
-        { tier:null,              id:'me', n:'Multiversal Engine',  b:'+4Qa CPC',             cpc:4e15,      c:2e19,      s:1.65 },
-        { tier:null,              id:'sg', n:'The Singularity',     b:'+80Qa CPS',            cps:8e16,      c:5e20,      s:1.7  },
-
-        // ASCENSION SPECIALS
-        { tier:'✦ ASCENSION',    id:'ap', n:'Absolute Precision',  b:'100% CRIT RATE',       ap:true,       c:1e22,      s:10, isFinal:true },
-        { tier:null,             id:'mi', n:'Midas Touch',          b:'3× All Production',   midas:3,       c:1e23,      s:10, isMidas:true },
+        { tier:'TIER I — MORTAL',      id:'m',   n:'Mass Gain',          b:'+1 CPS',               cps:1,            c:10,         s:1.15 },
+        { tier:null,                   id:'s',   n:'Strength Training',  b:'+3 CPC',               cpc:3,            c:50,         s:1.18 },
+        { tier:null,                   id:'cr',  n:'Focus Aura',         b:'+3% Crit (cap 50%)',   cr:0.03,          c:200,        s:1.3  },
+        { tier:null,                   id:'sh',  n:'Bio-Power',          b:'+10 CPS / +5 CPC',     cps:10, cpc:5,    c:800,        s:1.22 },
+        { tier:null,                   id:'n',   n:'Neural Pulse',       b:'+40 CPS',              cps:40,           c:3000,       s:1.25 },
+        { tier:'TIER II — ADEPT',      id:'q',   n:'Quantum Lift',       b:'+100 CPC',             cpc:100,          c:20000,      s:1.28 },
+        { tier:null,                   id:'g',   n:'Gravity Well',       b:'+500 CPS',             cps:500,          c:100000,     s:1.3  },
+        { tier:null,                   id:'nb',  n:'Nano-Repair',        b:'+2K CPS / +1K CPC',    cps:2000,cpc:1000,c:600000,     s:1.32 },
+        { tier:null,                   id:'cy',  n:'Cyber Frame',        b:'+12K CPS',             cps:12000,        c:4000000,    s:1.35 },
+        { tier:'TIER III — ELITE',     id:'v',   n:'Void Breath',        b:'+40K CPC',             cpc:40000,        c:20000000,   s:1.38 },
+        { tier:null,                   id:'sl',  n:'Solar Synthesis',    b:'+120K CPS',            cps:120000,       c:120000000,  s:1.4  },
+        { tier:null,                   id:'ga',  n:'Galaxy Mind',        b:'+2M CPS',              cps:2000000,      c:1000000000, s:1.42 },
+        { tier:'TIER IV — COSMIC',     id:'ti',  n:'Time Warp',          b:'+15M CPC',             cpc:15000000,     c:1e10,       s:1.45 },
+        { tier:null,                   id:'cb',  n:'Chrono-Buffer',      b:'+60M CPC',             cpc:60000000,     c:8e10,       s:1.45 },
+        { tier:null,                   id:'dt',  n:'Dimensional Tear',   b:'+200M CPS',            cps:2e8,          c:5e11,       s:1.48 },
+        { tier:null,                   id:'af',  n:'Antimatter Forge',   b:'+1.5B CPS',            cps:1.5e9,        c:6e12,       s:1.5  },
+        { tier:'TIER V — UNIVERSAL',   id:'nc',  n:'Neutron Core',       b:'+8B CPC',              cpc:8e9,          c:3e13,       s:1.52 },
+        { tier:null,                   id:'eh',  n:'Event Horizon',      b:'+100B CPS',            cps:1e11,         c:2e14,       s:1.55 },
+        { tier:null,                   id:'dm',  n:'Dark Infusion',      b:'+600B CPS',            cps:6e11,         c:2e15,       s:1.55 },
+        { tier:null,                   id:'uc',  n:'Universal Constant', b:'+3T CPC',              cpc:3e12,         c:1.5e16,     s:1.58 },
+        { tier:'TIER VI — OMNIVERSAL', id:'cbg', n:'Cosmic Background',  b:'+40T CPS',             cps:4e13,         c:2e17,       s:1.6  },
+        { tier:null,                   id:'ta',  n:'The Great Attractor',b:'+300T CPS',            cps:3e14,         c:2e18,       s:1.62 },
+        { tier:null,                   id:'me',  n:'Multiversal Engine', b:'+4Qa CPC',             cpc:4e15,         c:2e19,       s:1.65 },
+        { tier:null,                   id:'sg',  n:'The Singularity',    b:'+80Qa CPS',            cps:8e16,         c:5e20,       s:1.7  },
+        { tier:'✦ ASCENSION',          id:'ap',  n:'Absolute Precision', b:'100% CRIT RATE',       ap:true,          c:1e22,       s:10,  isFinal:true },
+        { tier:null,                   id:'mi',  n:'Midas Touch',        b:'3× All Production',    midas:3,          c:1e23,       s:10,  isMidas:true },
     ];
 
-    /* ── REBIRTH PERKS ── */
+    /* ── PERKS ── */
     const BASE_PERKS = [
-        { id:'rb_cpc',   n:'Iron Grip',        b:'+50% Click Power per buy',       cpcMult:0.5,  c:1,   maxLvl:20 },
-        { id:'rb_cps',   n:'Endless Flow',      b:'+50% CPS per buy',               cpsMult:0.5,  c:1,   maxLvl:20 },
-        { id:'rb_crit',  n:'Lucky Soul',        b:'+5% Base Crit per buy',          pcrit:0.05,   c:2,   maxLvl:10 },
-        { id:'rb_mult',  n:'Ascension Might',   b:'+30% Rebirth Mult per buy',      pmult:0.3,    c:3,   maxLvl:15 },
-        { id:'rb_start', n:'Head Start',        b:'Start with 500 score after RB',  pstart:500,   c:5,   maxLvl:10 },
-        { id:'rb_cheap', n:'Bargain Hunter',    b:'-5% upgrade costs per buy',      pcheap:0.05,  c:8,   maxLvl:10 },
-        { id:'rb_crit2', n:'Surgical Strike',   b:'Crits deal +100% bonus (×6 total)',pcrit2:1, c:15, maxLvl:5  },
-        { id:'rb_auto',  n:'AutoClicker',       b:'+2 Auto-Clicks/sec per buy',     pauto:2,      c:25,  maxLvl:10 },
-        { id:'rb_god',   n:'God Finger',        b:'2× CPC per buy (stacks!)',       pclick:1,     c:50,  maxLvl:5  },
-        { id:'rb_god2',  n:'Time God',          b:'2× CPS per buy (stacks!)',       pgod2:1,      c:100, maxLvl:5  },
+        { id:'rb_cpc',   n:'Iron Grip',       b:'+50% Click Power per buy',          c:1,   maxLvl:20 },
+        { id:'rb_cps',   n:'Endless Flow',    b:'+50% CPS per buy',                  c:1,   maxLvl:20 },
+        { id:'rb_crit',  n:'Lucky Soul',      b:'+5% Base Crit per buy',             c:2,   maxLvl:10 },
+        { id:'rb_mult',  n:'Ascension Might', b:'+30% Rebirth Mult per buy',         c:3,   maxLvl:15 },
+        { id:'rb_start', n:'Head Start',      b:'Start with 500 score after RB',     c:5,   maxLvl:10, pstart:500 },
+        { id:'rb_cheap', n:'Bargain Hunter',  b:'-5% upgrade costs per buy',         c:8,   maxLvl:10 },
+        { id:'rb_crit2', n:'Surgical Strike', b:'Crits deal +100% bonus (×6 total)', c:15,  maxLvl:5  },
+        { id:'rb_auto',  n:'AutoClicker',     b:'+2 Auto-Clicks/sec per buy',        c:25,  maxLvl:10 },
+        { id:'rb_god',   n:'God Finger',      b:'2× CPC per buy (stacks!)',          c:50,  maxLvl:5  },
+        { id:'rb_god2',  n:'Time God',        b:'2× CPS per buy (stacks!)',          c:100, maxLvl:5  },
     ];
 
     /* ── STATE ── */
@@ -238,6 +263,88 @@ const App = (() => {
         midasMult:1, hasAP:false, currentTab:'upgrades',
         upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c})),
         perks:    BASE_PERKS.map(p => ({id:p.id, lvl:0})),
+    };
+
+    /* ── MUSIC (Web Audio API) ── */
+    let audioCtx = null, musicPlaying = false, musicStopFns = [];
+
+    const startMusic = () => {
+        if (musicPlaying) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const master = audioCtx.createGain();
+        master.gain.value = 0.15;
+        master.connect(audioCtx.destination);
+
+        // Delay/reverb send
+        const dly = audioCtx.createDelay(1.0);
+        dly.delayTime.value = 0.3;
+        const dlyGain = audioCtx.createGain();
+        dlyGain.gain.value = 0.28;
+        dly.connect(dlyGain); dlyGain.connect(dly); dlyGain.connect(master);
+
+        const mkOsc = (type, freq, amp, detune=0) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = type; o.frequency.value = freq; o.detune.value = detune;
+            g.gain.value = amp;
+            o.connect(g); g.connect(master); g.connect(dly);
+            o.start();
+            return { stop: () => { try { o.stop(); } catch(e){} } };
+        };
+
+        // Lush pad chords — A minor pentatonic
+        const p1 = mkOsc('sine',     110, 0.55);      // A2
+        const p2 = mkOsc('sine',     165, 0.40);      // E3
+        const p3 = mkOsc('sine',     220, 0.30, 10);  // A3 detune
+        const p4 = mkOsc('triangle', 55,  0.35);      // A1 sub
+
+        // Slow swell LFO
+        const lfo = audioCtx.createOscillator();
+        const lfoG = audioCtx.createGain();
+        lfo.frequency.value = 0.07; lfoG.gain.value = 0.1;
+        lfo.connect(lfoG); lfoG.connect(master.gain); lfo.start();
+
+        // Pentatonic arpeggio
+        const arpeNotes = [220, 261.63, 293.66, 349.23, 392, 440, 523.25, 440, 392, 349.23, 293.66, 261.63];
+        const arpeOsc = audioCtx.createOscillator();
+        const arpeGain = audioCtx.createGain();
+        arpeOsc.type = 'triangle'; arpeGain.gain.value = 0;
+        arpeOsc.connect(arpeGain); arpeGain.connect(master); arpeOsc.start();
+        let arpeIdx = 0, arpeTimer = null;
+        const tickArpe = () => {
+            if (!musicPlaying) return;
+            const t = audioCtx.currentTime;
+            arpeOsc.frequency.setValueAtTime(arpeNotes[arpeIdx++ % arpeNotes.length], t);
+            arpeGain.gain.cancelScheduledValues(t);
+            arpeGain.gain.setValueAtTime(0, t);
+            arpeGain.gain.linearRampToValueAtTime(0.07, t + 0.04);
+            arpeGain.gain.linearRampToValueAtTime(0, t + 0.45);
+            arpeTimer = setTimeout(tickArpe, 500);
+        };
+        arpeTimer = setTimeout(tickArpe, 300);
+
+        musicStopFns = [
+            () => p1.stop(), () => p2.stop(), () => p3.stop(), () => p4.stop(),
+            () => { try { lfo.stop(); } catch(e){} },
+            () => { try { arpeOsc.stop(); } catch(e){} },
+            () => { clearTimeout(arpeTimer); },
+            () => master.disconnect(),
+        ];
+
+        musicPlaying = true;
+        const btn = document.getElementById('music-btn');
+        btn.className = 'playing'; btn.innerText = '♪ MUSIC ON';
+    };
+
+    const stopMusic = () => {
+        if (!musicPlaying) return;
+        musicStopFns.forEach(fn => { try { fn(); } catch(e){} });
+        musicStopFns = [];
+        musicPlaying = false;
+        const btn = document.getElementById('music-btn');
+        btn.className = ''; btn.innerText = '♪ MUSIC OFF';
     };
 
     /* ── SAVE / LOAD ── */
@@ -250,9 +357,8 @@ const App = (() => {
         localStorage.setItem(SAVE_KEY, JSON.stringify(S));
         const t = document.getElementById('save-toast');
         t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 1500);
+        setTimeout(() => t.classList.remove('show'), 1400);
     };
-
     const load = () => {
         const raw = localStorage.getItem(SAVE_KEY);
         if (!raw) return;
@@ -270,80 +376,84 @@ const App = (() => {
         });
     };
 
-    /* ── DERIVED STATS ── */
+    /* ── STATS ── */
     const getStats = () => {
-        const perkLvl = id => S.perks.find(p => p.id === id)?.lvl || 0;
-
-        const rbMult       = 1 + (S.rebirths * 0.6 * (1 + perkLvl('rb_mult') * 0.3));
-        const midasMult    = S.midasMult;
-        const globalMult   = rbMult * midasMult;
-
-        const cpcMult      = Math.pow(2, perkLvl('rb_god'))  * (1 + perkLvl('rb_cpc') * 0.5);
-        const cpsMult      = Math.pow(2, perkLvl('rb_god2')) * (1 + perkLvl('rb_cps') * 0.5);
-
-        const critBase     = S.hasAP ? 1 : Math.min(S.crit + perkLvl('rb_crit') * 0.05, 0.5);
-        const critMult     = 5 + perkLvl('rb_crit2');  // base 5×, +1 per buy
-        const autoCps      = perkLvl('rb_auto') * 2;   // auto-clicks/sec
-
-        const cheapMult    = Math.max(0.5, 1 - perkLvl('rb_cheap') * 0.05);
-
+        const lvl = id => S.perks.find(p => p.id === id)?.lvl || 0;
+        const rbMult     = 1 + (S.rebirths * 0.6 * (1 + lvl('rb_mult') * 0.3));
+        const globalMult = rbMult * S.midasMult;
+        const cpcMult    = Math.pow(2, lvl('rb_god'))  * (1 + lvl('rb_cpc')  * 0.5);
+        const cpsMult    = Math.pow(2, lvl('rb_god2')) * (1 + lvl('rb_cps')  * 0.5);
+        const critBase   = S.hasAP ? 1 : Math.min(S.crit + lvl('rb_crit') * 0.05, 0.5);
+        const critMult   = 5 + lvl('rb_crit2');
+        const autoCps    = lvl('rb_auto') * 2;
+        const cheapMult  = Math.max(0.5, 1 - lvl('rb_cheap') * 0.05);
         const effectiveCpc = S.cpc * globalMult * cpcMult;
         const effectiveCps = (S.cps * cpsMult + autoCps * S.cpc * cpcMult) * globalMult;
-
-        return { globalMult, cpcMult, cpsMult, critBase, critMult, cheapMult, effectiveCpc, effectiveCps };
+        return { globalMult, critBase, critMult, cheapMult, effectiveCpc, effectiveCps };
     };
 
-    /* ── REBIRTH CALCULATION ── */
     const calcRebirths = () => {
         let count = 0, next = S.rebirthCost, temp = S.score;
         while (temp >= next && count < 10000) { temp -= next; next *= 1.8; count++; }
         return count;
     };
 
-    /* ── REFRESH UI ── */
+    /* ── RIPPLE ── */
+    const spawnRipple = (e, isCrit) => {
+        const wrap = document.getElementById('click-wrap');
+        const rect = wrap.getBoundingClientRect();
+        const r = document.createElement('div');
+        r.className = 'ripple' + (isCrit ? ' crit' : '');
+        r.style.left = (e.clientX - rect.left) + 'px';
+        r.style.top  = (e.clientY - rect.top)  + 'px';
+        r.style.width  = '70px';
+        r.style.height = '70px';
+        wrap.appendChild(r);
+        setTimeout(() => r.remove(), 700);
+    };
+
+    /* ── REFRESH ── */
     const refresh = () => {
         const st = getStats();
         const possible = calcRebirths();
 
-        document.getElementById('score-box').innerText = fmt(S.score);
-        document.getElementById('st-cps').innerText   = fmt(st.effectiveCps);
-        document.getElementById('st-cpc').innerText   = fmt(st.effectiveCpc);
-        document.getElementById('st-crit').innerText  = Math.round(st.critBase * 100) + '%';
-        document.getElementById('st-mult').innerText  = 'x' + st.globalMult.toFixed(2);
-        document.getElementById('rb-status').innerText = `${S.rebirths} Rebirths  |  ${S.currentRB} RB Available`;
+        document.getElementById('score-box').innerText   = fmt(S.score);
+        document.getElementById('st-cps').innerText      = fmt(st.effectiveCps);
+        document.getElementById('st-cpc').innerText      = fmt(st.effectiveCpc);
+        document.getElementById('st-crit').innerText     = Math.round(st.critBase * 100) + '%';
+        document.getElementById('st-mult').innerText     = 'x' + st.globalMult.toFixed(2);
+        document.getElementById('rb-status').innerText   = `${S.rebirths} Rebirths  |  ${S.currentRB} RB Available`;
         document.getElementById('tab-rebirth').innerText = `RB SHOP (${S.currentRB})`;
         document.getElementById('rebirth-btn').innerText = `REBIRTH (+${possible} RB)`;
-        document.getElementById('rebirth-btn').disabled = possible === 0;
+        document.getElementById('rebirth-btn').disabled  = possible === 0;
 
-        // Update cards
         if (S.currentTab === 'upgrades') {
             S.upgrades.forEach(u => {
                 const el = document.getElementById('card-' + u.id);
                 if (!el) return;
-                const def = BASE_UPGRADES.find(x => x.id === u.id);
                 const actualCost = u.c * st.cheapMult;
-                const can = S.score >= actualCost;
-                el.classList.toggle('locked', !can);
-                el.querySelector('.u-cost').innerText  = 'Cost: ' + fmt(actualCost);
+                el.classList.toggle('locked', S.score < actualCost);
+                el.querySelector('.u-cost').innerText      = 'Cost: ' + fmt(actualCost);
                 el.querySelector('.u-lvl-badge').innerText = 'LVL ' + u.lvl;
+                el.querySelector('.u-bought').innerText    = 'Purchased: ' + u.lvl + '×';
             });
         } else {
             S.perks.forEach(p => {
                 const el = document.getElementById('card-' + p.id);
                 if (!el) return;
-                const def = BASE_PERKS.find(x => x.id === p.id);
+                const def   = BASE_PERKS.find(x => x.id === p.id);
                 const maxed = def.maxLvl && p.lvl >= def.maxLvl;
                 const cost  = def.c * (p.lvl + 1);
-                const can   = S.currentRB >= cost && !maxed;
-                el.classList.toggle('locked', !can);
-                el.querySelector('.u-cost').innerText  = maxed ? 'MAXED' : 'Cost: ' + cost + ' RB';
+                el.classList.toggle('locked', maxed || S.currentRB < cost);
+                el.querySelector('.u-cost').innerText      = maxed ? 'MAXED' : 'Cost: ' + cost + ' RB';
                 el.querySelector('.u-lvl-badge').innerText = maxed ? 'MAX' : `LVL ${p.lvl}/${def.maxLvl}`;
+                el.querySelector('.u-bought').innerText    = 'Purchased: ' + p.lvl + '×';
             });
         }
     };
 
     /* ── RENDER SHOP ── */
-    const renderShop = (tab) => {
+    const renderShop = tab => {
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
 
@@ -359,53 +469,59 @@ const App = (() => {
                 }
                 const u = S.upgrades.find(x => x.id === def.id);
                 const card = document.createElement('div');
-                card.className = `card ${def.isMidas ? 'is-midas' : ''} ${def.isFinal ? 'is-final' : ''}`;
+                card.className = `card${def.isMidas?' is-midas':''}${def.isFinal?' is-final':''}`;
                 card.id = 'card-' + def.id;
                 card.onclick = () => buyUpgrade(i);
                 card.innerHTML = `
-                    <div class="card-header">
+                    <div class="card-row1">
                         <div class="u-title">${def.n}</div>
                         <div class="u-lvl-badge">LVL 0</div>
                     </div>
-                    <div class="u-benefit">${def.b}</div>
-                    <div class="u-cost">Cost: ${fmt(def.c)}</div>`;
+                    <div class="card-row2">
+                        <div class="u-benefit">${def.b}</div>
+                        <div class="u-cost">Cost: ${fmt(def.c)}</div>
+                    </div>
+                    <div class="card-row3">
+                        <div class="u-bought">Purchased: 0×</div>
+                    </div>`;
                 list.appendChild(card);
             });
         } else {
             const hdr = document.createElement('div');
-            hdr.className = 'tier-label';
-            hdr.innerText = 'PERMANENT REBIRTH PERKS';
+            hdr.className = 'tier-label'; hdr.innerText = 'PERMANENT REBIRTH PERKS';
             list.appendChild(hdr);
-
             BASE_PERKS.forEach((def, i) => {
-                const p = S.perks.find(x => x.id === def.id);
+                const p    = S.perks.find(x => x.id === def.id);
+                const cost = def.c * (p.lvl + 1);
                 const card = document.createElement('div');
                 card.className = 'card is-perk';
                 card.id = 'card-' + def.id;
                 card.onclick = () => buyPerk(i);
-                const cost = def.c * (p.lvl + 1);
                 card.innerHTML = `
-                    <div class="card-header">
+                    <div class="card-row1">
                         <div class="u-title">${def.n}</div>
                         <div class="u-lvl-badge">LVL 0/${def.maxLvl}</div>
                     </div>
-                    <div class="u-benefit">${def.b}</div>
-                    <div class="u-cost">Cost: ${cost} RB</div>`;
+                    <div class="card-row2">
+                        <div class="u-benefit">${def.b}</div>
+                        <div class="u-cost">Cost: ${cost} RB</div>
+                    </div>
+                    <div class="card-row3">
+                        <div class="u-bought">Purchased: 0×</div>
+                    </div>`;
                 list.appendChild(card);
             });
         }
+        refresh();
     };
 
-    /* ── BUY UPGRADE ── */
-    const buyUpgrade = (i) => {
-        const def = BASE_UPGRADES[i];
-        const u   = S.upgrades.find(x => x.id === def.id);
-        const st  = getStats();
-        const cost = u.c * st.cheapMult;
+    /* ── BUY ── */
+    const buyUpgrade = i => {
+        const def  = BASE_UPGRADES[i];
+        const u    = S.upgrades.find(x => x.id === def.id);
+        const cost = u.c * getStats().cheapMult;
         if (S.score < cost) return;
-
-        S.score -= cost;
-        u.lvl++;
+        S.score -= cost; u.lvl++;
         if (def.cps)   S.cps  += def.cps;
         if (def.cpc)   S.cpc  += def.cpc;
         if (def.ap)  { S.hasAP = true; S.crit = 1; }
@@ -415,19 +531,17 @@ const App = (() => {
         refresh(); scheduleSave();
     };
 
-    /* ── BUY PERK ── */
-    const buyPerk = (i) => {
-        const def = BASE_PERKS[i];
-        const p   = S.perks.find(x => x.id === def.id);
+    const buyPerk = i => {
+        const def  = BASE_PERKS[i];
+        const p    = S.perks.find(x => x.id === def.id);
         if (def.maxLvl && p.lvl >= def.maxLvl) return;
         const cost = def.c * (p.lvl + 1);
         if (S.currentRB < cost) return;
-        S.currentRB -= cost;
-        p.lvl++;
+        S.currentRB -= cost; p.lvl++;
         refresh(); scheduleSave();
     };
 
-    /* ── SNOWFLAKES ── */
+    /* ── SNOW ── */
     const makeSnow = () => {
         const c = document.getElementById('snow');
         for (let i = 0; i < 35; i++) {
@@ -439,69 +553,52 @@ const App = (() => {
         }
     };
 
-    load();
-    makeSnow();
-
-    // CPS tick (10×/sec)
-    setInterval(() => {
-        const st = getStats();
-        S.score += st.effectiveCps / 10;
-        refresh();
-    }, 100);
-
-    // Autosave every 30s regardless
+    load(); makeSnow();
+    setInterval(() => { S.score += getStats().effectiveCps / 10; refresh(); }, 100);
     setInterval(doSave, 30000);
 
     return {
-        click: (e) => {
-            const st = getStats();
+        click: e => {
+            const st     = getStats();
             const isCrit = Math.random() < st.critBase;
             const gain   = st.effectiveCpc * (isCrit ? st.critMult : 1);
             S.score += gain;
-
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            popup.style.cssText = `left:${e.clientX - 20}px;top:${e.clientY - 20}px;color:${isCrit ? 'var(--crit)' : 'var(--accent)'}`;
-            popup.innerText = (isCrit ? '⚡ CRIT! +' : '+') + fmt(gain);
-            document.body.appendChild(popup);
-            setTimeout(() => popup.remove(), 750);
+            spawnRipple(e, isCrit);
+            const pop = document.createElement('div');
+            pop.className = 'popup';
+            pop.style.cssText = `left:${e.clientX-20}px;top:${e.clientY-30}px;color:${isCrit?'var(--crit)':'var(--accent)'}`;
+            pop.innerText = (isCrit ? '⚡ CRIT! +' : '+') + fmt(gain);
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 750);
             refresh(); scheduleSave();
         },
 
         rebirth: () => {
             const possible = calcRebirths();
-            if (possible === 0) return;
+            if (!possible) return;
             let next = S.rebirthCost;
             for (let i = 0; i < possible; i++) { S.score -= next; next *= 1.8; }
-            S.rebirths   += possible;
-            S.currentRB  += possible;
-            S.rebirthCost = next;
-
-            // Get head-start perk value
-            const startPerk = S.perks.find(p => p.id === 'rb_start');
-            const startDef  = BASE_PERKS.find(p => p.id === 'rb_start');
-            const startBonus = (startPerk?.lvl || 0) * (startDef?.pstart || 0);
-
-            // Reset run state
-            S.score = startBonus; S.cps = 0; S.cpc = 1; S.crit = 0.05; S.midasMult = 1; S.hasAP = false;
+            S.rebirths += possible; S.currentRB += possible; S.rebirthCost = next;
+            const sP = S.perks.find(p => p.id === 'rb_start');
+            const sD = BASE_PERKS.find(p => p.id === 'rb_start');
+            S.score = (sP?.lvl || 0) * (sD?.pstart || 0);
+            S.cps = 0; S.cpc = 1; S.crit = 0.05; S.midasMult = 1; S.hasAP = false;
             S.upgrades.forEach(u => { const b = BASE_UPGRADES.find(x => x.id === u.id); u.lvl = 0; u.c = b.c; });
-
-            doSave();
-            App.setTab('upgrades');
+            doSave(); App.setTab('upgrades');
         },
 
-        setTab: (t) => {
+        setTab: t => {
             S.currentTab = t;
             document.getElementById('tab-upgrades').classList.toggle('active', t === 'upgrades');
             document.getElementById('tab-rebirth').classList.toggle('active',  t === 'rebirth');
             renderShop(t);
-            refresh();
         },
+
+        toggleMusic: () => musicPlaying ? stopMusic() : startMusic(),
 
         clearData: () => {
             if (confirm('DELETE ALL PROGRESS? This cannot be undone.')) {
-                localStorage.removeItem(SAVE_KEY);
-                location.reload();
+                localStorage.removeItem(SAVE_KEY); location.reload();
             }
         },
 

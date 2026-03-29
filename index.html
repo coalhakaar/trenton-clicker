@@ -12,57 +12,121 @@
         --success: #00ff88; --midas: #ffd700; --crit: #ff4757;
         --final: #ff00ff; --fira: 'Fira Code', monospace;
     }
-    body, html { margin: 0; padding: 0; height: 100%; font-family: var(--fira); background: var(--bg); color: #e6edf3; overflow: hidden; }
-    #game { display: grid; grid-template-columns: 1fr 460px; height: 100vh; }
-    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 80px; }
-    #trenton { width: 220px; height: 220px; border-radius: 50%; border: 3px solid var(--accent); cursor: pointer; transition: 0.05s; user-select: none; }
-    #trenton:active { transform: scale(0.92); filter: brightness(1.5); }
-    #score-box { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px 30px; margin-top: 20px; border-radius: 60px; font-size: 2.2rem; backdrop-filter: blur(15px); min-width: 240px; text-align: center; }
-    #shop-container { background: rgba(0,0,0,0.8); border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
-    #shop-list { padding: 20px; overflow-y: scroll; display: flex; flex-direction: column; gap: 8px; height: 100%; }
-    .card { background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; position: relative; }
-    .card:hover:not(.locked) { border-color: var(--accent); background: rgba(0, 210, 255, 0.05); }
-    .card.locked { opacity: 0.2; cursor: not-allowed; }
-    .u-title { font-weight: bold; color: var(--accent); font-size: 0.85rem; }
-    .u-cost { color: #fff; font-size: 0.8rem; font-weight: bold; }
-    #stats { position: fixed; bottom: 0; left: 0; width: calc(100% - 460px); height: 80px; background: rgba(0,0,0,0.95); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; }
-    .controls { margin-top: 15px; display: flex; flex-direction: column; gap: 6px; width: 280px; }
-    button { font-family: var(--fira); font-weight: bold; cursor: pointer; border: none; border-radius: 4px; }
-    #rebirth-btn { padding: 10px; background: var(--rebirth); color: white; }
-    .small-btn { padding: 4px; font-size: 0.6rem; background: #111; color: #555; border: 1px solid #333; }
-    #clear-btn { background: #3d0000; color: #ff4757; border: 1px solid #700; }
-    #clear-btn:hover { background: #600; color: #fff; }
-    .popup { position: absolute; pointer-events: none; animation: float-up 0.6s forwards; font-weight: bold; z-index: 100; }
-    @keyframes float-up { to { transform: translateY(-80px); opacity: 0; } }
+    body, html { 
+        margin: 0; padding: 0; height: 100%; font-family: var(--fira); 
+        background: var(--bg); color: #e6edf3; overflow: hidden;
+        background-image: radial-gradient(circle at 50% 50%, #0a1118 0%, #020406 100%);
+    }
+
+    #game { display: grid; grid-template-columns: 1fr 500px; height: 100vh; }
+    
+    #main { 
+        display: flex; flex-direction: column; align-items: center; 
+        justify-content: center; position: relative; padding-bottom: 100px; 
+    }
+
+    h1 { font-size: 2.5rem; color: var(--accent); letter-spacing: 6px; margin-bottom: 20px; text-shadow: 0 0 20px rgba(0,210,255,0.3); }
+
+    /* RIPPLE EFFECT */
+    .ripple {
+        position: absolute; border: 2px solid var(--accent); border-radius: 50%;
+        transform: translate(-50%, -50%); pointer-events: none;
+        animation: ripple-out 0.8s ease-out forwards; opacity: 0.6;
+    }
+    @keyframes ripple-out {
+        to { width: 300px; height: 300px; opacity: 0; border-width: 0; }
+    }
+
+    #trenton-container { position: relative; }
+    #trenton { 
+        width: 280px; height: 280px; border-radius: 50%; border: 4px solid var(--accent); 
+        cursor: pointer; transition: transform 0.05s; user-select: none;
+        box-shadow: 0 0 50px rgba(0, 210, 255, 0.15);
+    }
+    #trenton:active { transform: scale(0.94); }
+
+    #score-box { 
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 20px 50px; 
+        margin-top: 30px; border-radius: 80px; font-size: 3rem; backdrop-filter: blur(20px); 
+        min-width: 300px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    #shop-container { background: rgba(0,0,0,0.85); border-left: 2px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
+    #shop-list { padding: 25px; overflow-y: scroll; display: flex; flex-direction: column; gap: 12px; height: 100%; }
+
+    /* CLASSIC UI CARDS */
+    .card { 
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 18px; 
+        border-radius: 12px; cursor: pointer; transition: 0.3s; position: relative;
+        display: flex; flex-direction: column; gap: 5px;
+    }
+    .card:hover:not(.locked) { border-color: var(--accent); background: rgba(255,255,255,0.08); transform: scale(1.02); }
+    .card.locked { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
+    
+    .u-lvl-badge { position: absolute; top: 10px; right: 15px; font-size: 0.7rem; color: var(--accent); opacity: 0.7; }
+    .u-title { font-weight: bold; color: #fff; font-size: 1.1rem; }
+    .u-benefit { color: var(--success); font-size: 0.8rem; font-weight: bold; }
+    .u-cost { color: var(--midas); font-size: 1rem; font-weight: bold; margin-top: 5px; }
+
+    #stats { 
+        position: fixed; bottom: 0; left: 0; width: calc(100% - 500px); height: 100px; 
+        background: rgba(0,0,0,0.95); border-top: 2px solid var(--glass-border); 
+        display: flex; justify-content: space-around; align-items: center; 
+    }
+    .stat-val { font-size: 1.5rem; font-weight: bold; color: #fff; }
+    .stat-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+
+    .controls { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; width: 350px; }
+    button { font-family: var(--fira); font-weight: bold; cursor: pointer; border: none; border-radius: 8px; transition: 0.2s; }
+    #rebirth-btn { padding: 18px; background: var(--rebirth); color: white; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3); }
+    #rebirth-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+    
+    .aux-btns { display: flex; gap: 10px; }
+    .small-btn { flex: 1; padding: 10px; font-size: 0.7rem; background: #1a1a1a; color: #888; border: 1px solid #333; }
+    .small-btn:hover { background: #252525; color: #fff; }
+    #clear-btn:hover { border-color: var(--crit); color: var(--crit); }
+
+    .popup { position: absolute; pointer-events: none; animation: float-up 0.8s forwards; font-weight: bold; font-size: 1.2rem; z-index: 100; }
+    @keyframes float-up { to { transform: translateY(-120px) scale(1.2); opacity: 0; } }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
 <body>
 
 <div id="game">
     <div id="main">
-        <h1 style="letter-spacing:3px; color:var(--accent); font-size: 1.5rem;">TRENTON ASCENDED</h1>
-        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        <h1>TRENTON ASCENDED</h1>
+        <div id="trenton-container">
+            <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        </div>
         <div id="score-box">0</div>
+        <div style="margin-top:10px; font-size:0.9rem; color:#555;" id="total-upgrades">Total Upgrades: 0</div>
+        
         <div class="controls">
             <button id="rebirth-btn" onclick="App.rebirth()">REBIRTH (+0)</button>
-            <button class="small-btn" onclick="App.toggleMusic()">TOGGLE MUSIC</button>
-            <button class="small-btn" id="clear-btn" onclick="App.clearData()">CLEAR ALL DATA</button>
-            <div id="rb-status" style="font-size:0.65rem; text-align:center; color:var(--rebirth)">0 Rebirths</div>
+            <div class="aux-btns">
+                <button class="small-btn" onclick="App.toggleMusic()">MUSIC: OFF</button>
+                <button class="small-btn" id="clear-btn" onclick="App.clearData()">CLEAR DATA</button>
+            </div>
+            <div id="rb-status" style="font-size:0.8rem; text-align:center; color:var(--rebirth); margin-top:5px;">0 Rebirths (0 Perk Points)</div>
         </div>
     </div>
+
     <div id="shop-container">
-        <div style="display:flex; background:#000; border-bottom:1px solid var(--glass-border)">
-            <button style="flex:1; padding:12px; background:transparent; color:var(--accent); font-weight:bold;" onclick="App.setTab('u')">UPGRADES</button>
-            <button style="flex:1; padding:12px; background:transparent; color:var(--rebirth); font-weight:bold;" onclick="App.setTab('p')">PERKS</button>
+        <div style="display:flex; background:#000; border-bottom:2px solid var(--glass-border)">
+            <button style="flex:1; padding:20px; background:transparent; color:var(--accent); font-weight:bold; font-size:1rem;" onclick="App.setTab('u')">UPGRADES</button>
+            <button style="flex:1; padding:20px; background:transparent; color:var(--rebirth); font-weight:bold; font-size:1rem;" onclick="App.setTab('p')">PERKS</button>
         </div>
         <div id="shop-list"></div>
     </div>
 </div>
 
 <div id="stats">
-    <div class="stat"><span id="st-cps">0</span><br><small style="font-size:0.5rem; color:#666">CPS</small></div>
-    <div class="stat"><span id="st-cpc">1</span><br><small style="font-size:0.5rem; color:#666">CPC</small></div>
-    <div class="stat"><span id="st-crit">5%</span><br><small style="font-size:0.5rem; color:#666">CRIT</small></div>
+    <div style="text-align:center"><div class="stat-label">Power / Sec</div><div class="stat-val" id="st-cps">0</div></div>
+    <div style="text-align:center"><div class="stat-label">Power / Click</div><div class="stat-val" id="st-cpc">1</div></div>
+    <div style="text-align:center"><div class="stat-label">Critical Hit</div><div class="stat-val" id="st-crit">5%</div></div>
 </div>
 
 <audio id="bgm" loop>
@@ -71,22 +135,22 @@
 
 <script>
 const App = (() => {
-    const SAVE_KEY = 'trenton_omega_v4';
+    const SAVE_KEY = 'trenton_eternal_v5_fix';
     const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "UDe", "DDe", "TDe", "QdDe", "QnDe", "SxDe", "SpDe", "OcDe", "NoDe", "Vg"];
     
     const baseItems = [
         { id: 'm', n: 'Mass Gain', b: '+1 CPS', cps: 1, c: 10, s: 1.15 },
-        { id: 's', n: 'Strength', b: '+3 CPC', cpc: 3, c: 50, s: 1.18 },
+        { id: 's', n: 'Strength Training', b: '+3 CPC', cpc: 3, c: 50, s: 1.18 },
         { id: 'sh', n: 'Bio-Power', b: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.22 },
         { id: 'n', n: 'Neural Pulse', b: '+45 CPS', cps: 45, c: 1500, s: 1.25 },
         { id: 'cr', n: 'Focus Aura', b: '+3% Crit', cr: 0.03, c: 5000, s: 1.3 },
         { id: 'q', n: 'Quantum Lift', b: '+120 CPC', cpc: 120, c: 18000, s: 1.28 },
         { id: 'g', n: 'Gravity Well', b: '+600 CPS', cps: 600, c: 75000, s: 1.3 },
         { id: 'nb', n: 'Nano-Repair', b: '+2K CPS / +1K CPC', cps: 2000, cpc: 1000, c: 300000, s: 1.32 },
-        { id: 'cy', n: 'Cyber Frame', b: '+10K CPS', cps: 10000, c: 1500000, s: 1.35 },
-        { id: 'v', n: 'Void Breath', b: '+50K CPC', cpc: 50000, c: 15000000, s: 1.38 },
-        { id: 'sl', n: 'Solar Synthesis', b: '+150K CPS', cps: 150000, c: 80000000, s: 1.4 },
-        { id: 'ga', n: 'Galaxy Mind', b: '+3M CPS', cps: 3000000, c: 1e9, s: 1.42 },
+        { id: 'cy', n: 'Cyber Frame', b: '+10K CPS', cps: 10000, c: 1.5e6, s: 1.35 },
+        { id: 'v', n: 'Void Breath', b: '+50K CPC', cpc: 50000, c: 1.5e7, s: 1.38 },
+        { id: 'sl', n: 'Solar Synthesis', b: '+150K CPS', cps: 150000, c: 8e7, s: 1.4 },
+        { id: 'ga', n: 'Galaxy Mind', b: '+3M CPS', cps: 3e6, c: 1e9, s: 1.42 },
         { id: 'ti', n: 'Time Warp', b: '+20M CPC', cpc: 2e7, c: 8e10, s: 1.45 },
         { id: 'cb', n: 'Chrono-Buffer', b: '+80M CPC', cpc: 8e7, c: 6e11, s: 1.45 },
         { id: 'dt', n: 'Dimensional Tear', b: '+300M CPS', cps: 3e8, c: 5e12, s: 1.48 },
@@ -105,7 +169,7 @@ const App = (() => {
     ];
 
     const perkItems = [
-        { id: 'p1', n: 'Ascension Might', b: '+50% RB Mult', pmult: 0.5, c: 1 },
+        { id: 'p1', n: 'Ascension Might', b: '+50% RB Power', pmult: 0.5, c: 1 },
         { id: 'p2', n: 'Lucky Soul', b: '+10% Base Crit', pcrit: 0.1, c: 5 },
         { id: 'p3', n: 'Time Flow', b: '+20% Extra CPS', pspeed: 0.2, c: 20 },
         { id: 'p4', n: 'God Finger', b: '2x Click Power', pclick: 1, c: 100 }
@@ -124,6 +188,8 @@ const App = (() => {
         return (n / Math.pow(10, e * 3)).toFixed(2) + suffixes[e];
     };
 
+    const save = () => localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+
     const refresh = () => {
         const rbPow = 1 + (state.perks.find(p=>p.id==='p1').lvl * 0.5);
         const pSpeed = 1 + (state.perks.find(p=>p.id==='p3').lvl * 0.2);
@@ -131,27 +197,38 @@ const App = (() => {
         const pCrit = state.perks.find(p=>p.id==='p2').lvl * 0.1;
         const baseMult = (1 + (state.rebirths * 0.7 * rbPow)) * state.midas;
         
+        const cps = state.upgrades.reduce((a,b)=>a+(b.cps||0)*b.lvl,0) * baseMult * pSpeed;
+        const cpc = state.upgrades.reduce((a,b)=>a+(b.cpc||0)*b.lvl,1) * baseMult * pClick;
+        const totalLvl = state.upgrades.reduce((a,b)=>a+b.lvl,0);
+
         document.getElementById('score-box').innerText = format(state.score);
-        document.getElementById('st-cps').innerText = format(state.upgrades.reduce((a,b)=>a+(b.cps||0)*b.lvl,0) * baseMult * pSpeed);
-        document.getElementById('st-cpc').innerText = format(state.upgrades.reduce((a,b)=>a+(b.cpc||0)*b.lvl,1) * baseMult * pClick);
+        document.getElementById('st-cps').innerText = format(cps);
+        document.getElementById('st-cpc').innerText = format(cpc);
         document.getElementById('st-crit').innerText = Math.round((state.hasAP ? 1 : Math.min(state.crit + pCrit, 0.5)) * 100) + "%";
+        document.getElementById('total-upgrades').innerText = `Total Upgrades: ${totalLvl}`;
         document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (${state.currentRBPoints} Perk Points)`;
 
-        let possibleRB = 0, rbCost = 1e5, tempScore = state.score;
-        while(tempScore >= rbCost) { tempScore -= rbCost; rbCost *= 1.7; possibleRB++; }
-        document.getElementById('rebirth-btn').innerText = `REBIRTH (+${possibleRB})`;
-        document.getElementById('rebirth-btn').disabled = possibleRB === 0;
+        let rb = 0, cost = 1e5, temp = state.score;
+        while(temp >= cost) { temp -= cost; cost *= 1.7; rb++; }
+        document.getElementById('rebirth-btn').innerText = `REBIRTH (+${rb})`;
+        document.getElementById('rebirth-btn').disabled = rb === 0;
 
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
-        
-        if (state.tab === 'u') {
-            state.upgrades.sort((a,b) => a.c - b.c);
-            state.upgrades.forEach(u => {
-                const card = document.createElement('div');
-                card.className = `card ${state.score < u.c ? 'locked' : ''}`;
-                card.innerHTML = `<div class="u-title">${u.n} (Lv ${u.lvl})</div><div style="font-size:0.6rem;color:#888">${u.b}</div><div class="u-cost">Cost: ${format(u.c)}</div>`;
-                card.onclick = () => {
+        const activeList = state.tab === 'u' ? state.upgrades : state.perks;
+        if(state.tab === 'u') activeList.sort((a,b) => a.c - b.c);
+
+        activeList.forEach(u => {
+            const card = document.createElement('div');
+            card.className = `card ${ (state.tab==='u'?state.score:state.currentRBPoints) < u.c ? 'locked' : ''}`;
+            card.innerHTML = `
+                <div class="u-lvl-badge">LVL ${u.lvl}</div>
+                <div class="u-title">${u.n}</div>
+                <div class="u-benefit">${u.b}</div>
+                <div class="u-cost">Cost: ${state.tab==='u' ? format(u.c) : u.c + ' RB'}</div>
+            `;
+            card.onclick = () => {
+                if(state.tab === 'u') {
                     if(state.score >= u.c) {
                         state.score -= u.c; u.lvl++; u.c *= u.s;
                         if(u.ap) state.hasAP = true;
@@ -159,41 +236,15 @@ const App = (() => {
                         if(u.midas) state.midas *= u.midas;
                         refresh(); save();
                     }
-                };
-                list.appendChild(card);
-            });
-        } else {
-            state.perks.forEach(p => {
-                const card = document.createElement('div');
-                card.className = `card ${state.currentRBPoints < p.c ? 'locked' : ''}`;
-                card.innerHTML = `<div class="u-title" style="color:var(--rebirth)">${p.n} (Lv ${p.lvl})</div><div style="font-size:0.6rem;color:#888">${p.b}</div><div class="u-cost">Cost: ${p.c} RB</div>`;
-                card.onclick = () => {
-                    if(state.currentRBPoints >= p.c) {
-                        state.currentRBPoints -= p.c; p.lvl++;
+                } else {
+                    if(state.currentRBPoints >= u.c) {
+                        state.currentRBPoints -= u.c; u.lvl++;
                         refresh(); save();
                     }
-                };
-                list.appendChild(card);
-            });
-        }
-    };
-
-    const save = () => localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    const load = () => {
-        const raw = localStorage.getItem(SAVE_KEY);
-        if(raw) {
-            const s = JSON.parse(raw);
-            state.score = s.score || 0; state.rebirths = s.rebirths || 0; state.currentRBPoints = s.currentRBPoints || 0;
-            state.hasAP = s.hasAP || false; state.crit = s.crit || 0.05; state.midas = s.midas || 1;
-            state.upgrades.forEach(u => {
-                const sv = (s.upgrades || []).find(x => x.id === u.id);
-                if(sv) { u.lvl = sv.lvl; u.c = sv.c; }
-            });
-            state.perks.forEach(p => {
-                const sv = (s.perks || []).find(x => x.id === p.id);
-                if(sv) p.lvl = sv.lvl;
-            });
-        }
+                }
+            };
+            list.appendChild(card);
+        });
     };
 
     setInterval(() => {
@@ -206,39 +257,18 @@ const App = (() => {
 
     return {
         click: (e) => {
+            // Ripple
+            const r = document.createElement('div');
+            r.className = 'ripple'; r.style.left = e.pageX+'px'; r.style.top = e.pageY+'px';
+            document.body.appendChild(r); setTimeout(()=>r.remove(), 800);
+
             const rbPow = 1 + (state.perks.find(p=>p.id==='p1').lvl * 0.5);
             const pClick = 1 + (state.perks.find(p=>p.id==='p4').lvl * 1);
             const pCrit = state.perks.find(p=>p.id==='p2').lvl * 0.1;
             const baseMult = (1 + (state.rebirths * 0.7 * rbPow)) * state.midas;
             const isCrit = Math.random() < (state.hasAP ? 1 : Math.min(state.crit + pCrit, 0.5));
             const gain = (state.upgrades.reduce((a,b)=>a+(b.cpc||0)*b.lvl,1) * baseMult * pClick) * (isCrit ? 5 : 1);
+            
             state.score += gain;
             const p = document.createElement('div'); p.className = 'popup';
-            p.style.left = e.pageX+'px'; p.style.top = e.pageY+'px'; p.style.color = isCrit?'var(--crit)':'var(--accent)';
-            p.innerText = (isCrit?'CRIT! ':'+') + format(gain);
-            document.body.appendChild(p); setTimeout(()=>p.remove(), 600);
-            refresh();
-        },
-        rebirth: () => {
-            let rb = 0, cost = 1e5;
-            while(state.score >= cost) { state.score -= cost; cost *= 1.7; rb++; }
-            if(rb > 0) {
-                state.rebirths += rb; state.currentRBPoints += rb; state.score = 0; state.midas = 1; state.hasAP = false; state.crit = 0.05;
-                state.upgrades.forEach(u => { u.lvl = 0; u.c = baseItems.find(x => x.id === u.id).c; });
-                refresh(); save();
-            }
-        },
-        setTab: (t) => { state.tab = t; refresh(); },
-        toggleMusic: () => {
-            const m = document.getElementById('bgm');
-            state.music = !state.music;
-            state.music ? m.play() : m.pause();
-        },
-        clearData: () => { if(confirm("Wipe everything permanently?")) { localStorage.removeItem(SAVE_KEY); location.reload(); } },
-        init: () => { load(); refresh(); }
-    };
-})();
-window.onload = () => App.init();
-</script>
-</body>
-</html>
+            p.style.left

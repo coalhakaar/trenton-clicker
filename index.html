@@ -3,198 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended</title>
+<title>Trenton Ascended v2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
-        --dark-bg: #0d1117;
-        --glass-bg: rgba(255, 255, 255, 0.05);
+        --dark-bg: #0b0e14;
+        --glass-bg: rgba(255, 255, 255, 0.03);
         --glass-border: rgba(255, 255, 255, 0.1);
-        --accent: #ff9f43;
-        --cost-color: #ffd700;
+        --accent: #00d2ff;
+        --secondary-accent: #3a7bd5;
+        --cost-color: #00ff88;
         --text-primary: #e6edf3;
         --text-secondary: #8b949e;
-        --btn-bg: #d35400;
-        --btn-hover: #e67e22;
-        --btn-disabled: #4a4e53;
-        --panel-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        --fira-font: 'Fira Code', 'Monaco', 'Consolas', 'Courier New', monospace;
+        --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        --fira-font: 'Fira Code', monospace;
     }
 
     body, html { 
         font-family: var(--fira-font);
-        margin: 0; 
-        padding: 0; 
-        height: 100%;
+        margin: 0; padding: 0; height: 100%;
         color: var(--text-primary);
         background: var(--dark-bg);
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
         overflow: hidden;
     }
 
-    /* Snowfall Background Container */
-    #snow-container {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        z-index: -1;
-    }
+    #snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+    .snowflake { position: absolute; top: -10%; color: white; border-radius: 50%; pointer-events: none; animation: fall linear infinite; }
+    @keyframes fall { to { transform: translateY(110vh); } }
 
-    .snowflake {
-        position: absolute;
-        top: -10%;
-        color: rgba(255, 255, 255, 0.7);
-        border-radius: 50%;
-        pointer-events: none;
-        animation: fall linear infinite;
-    }
+    #game-layout { display: grid; grid-template-columns: 1fr 400px; height: calc(100% - 100px); width: 100vw; }
 
-    @keyframes fall {
-        to { transform: translateY(110vh); }
-    }
-
-    /* Main Grid Layout */
-    #game-layout {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        height: calc(100% - 100px);
-        width: 100vw;
-        overflow: hidden;
-    }
-
-    /* Left Side - Main Click Area */
-    #main-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 40px;
-        backdrop-filter: blur(1px); /* minimal blur for the background itself */
-    }
-
-    h1 {
-        color: var(--accent);
-        font-weight: 700;
-        font-size: 3.5rem;
-        margin-bottom: 5px;
-        text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-    .subtitle {
-        color: var(--text-secondary);
-        font-size: 1.2rem;
-        margin-top: 0; margin-bottom: 30px;
-    }
-
+    #main-content { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; backdrop-filter: blur(2px); }
+    h1 { color: var(--accent); font-size: 3rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+    
     #clickable-image {
-        cursor: pointer;
-        width: 150px; height: 150px;
-        object-fit: cover;
-        border-radius: 50%;
-        box-shadow: 0 0 50px rgba(255, 159, 67, 0.3);
-        transition: transform 0.1s;
-        border: 4px solid var(--accent);
+        cursor: pointer; width: 180px; height: 180px; object-fit: cover; border-radius: 50%;
+        box-shadow: 0 0 30px var(--accent); transition: all 0.1s; border: 3px solid var(--accent);
     }
-    #clickable-image:hover { transform: scale(1.03); }
-    #clickable-image:active { transform: scale(0.95); }
+    #clickable-image:active { transform: scale(0.9); filter: brightness(1.5); }
 
     #score-container {
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-radius: 15px;
-        padding: 20px 40px;
-        margin-top: 30px;
-        font-size: 4rem;
-        font-weight: 700;
-        backdrop-filter: blur(10px);
-        box-shadow: var(--panel-shadow);
-        color: var(--text-primary);
-        text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px;
+        padding: 15px 50px; margin-top: 30px; font-size: 3.5rem; backdrop-filter: blur(10px);
     }
 
-    /* Right Side - Upgrades Panel */
+    /* Upgrades Sidebar */
     #upgrades-panel {
-        background: rgba(0, 0, 0, 0.3); /* slightly darker background for depth */
-        border-left: 1px solid var(--glass-border);
-        padding: 30px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.4); border-left: 1px solid var(--glass-border);
+        padding: 20px; overflow-y: scroll; display: flex; flex-direction: column; gap: 12px;
     }
 
     .upgrade-card {
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        padding: 20px;
-        cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-        display: flex;
-        flex-direction: column;
-        backdrop-filter: blur(10px);
-        box-shadow: var(--panel-shadow);
+        background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 10px;
+        padding: 15px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
     }
-    .upgrade-card:hover:not(.disabled) {
-        background-color: rgba(255, 255, 255, 0.08);
-        transform: translateY(-2px);
-    }
-    .upgrade-card:active:not(.disabled) { transform: translateY(1px); }
-    .upgrade-card.disabled {
-        background-color: #2c3e5066;
-        cursor: not-allowed;
-        opacity: 0.6;
-        box-shadow: none;
-    }
+    .upgrade-card:hover:not(.disabled) { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+    .upgrade-card.disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .upgrade-title {
-        color: var(--accent);
-        font-size: 1.4rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-    .upgrade-desc {
-        color: var(--text-secondary);
-        font-size: 1rem;
-        margin-bottom: 15px;
-        line-height: 1.4;
-    }
-    .upgrade-benefit { color: var(--text-primary); font-weight: bold; }
-    .upgrade-cost {
-        font-weight: 700;
-        color: var(--cost-color);
-        font-size: 1.3rem;
-        margin-top: auto;
-    }
+    .upgrade-title { color: var(--accent); font-weight: bold; font-size: 1.1rem; }
+    .upgrade-desc { font-size: 0.85rem; color: var(--text-secondary); margin: 5px 0; }
+    .upgrade-cost { color: var(--cost-color); font-weight: bold; font-size: 1rem; }
 
-    /* Bottom - Stats Panel */
+    /* Stats Footer */
     #stats-panel {
-        background: rgba(0, 0, 0, 0.5);
-        border-top: 1px solid var(--glass-border);
-        padding: 20px;
-        height: 100px;
-        width: 100vw;
-        box-sizing: border-box;
-        backdrop-filter: blur(15px);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 80px;
-        font-size: 1.8rem;
-        font-weight: 700;
-        box-shadow: 0 -8px 32px 0 rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.6); border-top: 1px solid var(--glass-border);
+        height: 100px; display: flex; justify-content: space-around; align-items: center;
+        backdrop-filter: blur(20px); font-size: 1.4rem;
     }
+    .stat-box span { color: var(--accent); font-weight: bold; }
 
-    #stat-cps { color: #f1c40f; }
-    #stat-cpc { color: #2ecc71; }
-
-    /* Custom Scrollbar */
-    #upgrades-panel::-webkit-scrollbar { width: 10px; }
-    #upgrades-panel::-webkit-scrollbar-track { background: var(--dark-bg); }
-    #upgrades-panel::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
 </style>
 </head>
 <body>
@@ -204,153 +86,121 @@
 <div id="game-layout">
     <div id="main-content">
         <h1>Trenton Ascended</h1>
-        <p class="subtitle">Upgrade the ultimate being.</p>
-        <img id="clickable-image" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Click Me" onclick="TrentonGame.click()">
+        <img id="clickable-image" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="Game.click()">
         <div id="score-container">0 Power</div>
     </div>
     
     <div id="upgrades-panel">
-        <div class="upgrade-card disabled" id="upgrade-mass" onclick="TrentonGame.buyUpgrade('mass')">
+        <div class="upgrade-card disabled" id="up-mass" onclick="Game.buy('mass')">
             <div class="upgrade-title">Mass Gain</div>
-            <div class="upgrade-desc">
-                He gets massive.<br>
-                <span class="upgrade-benefit">+1 CPS</span>
-            </div>
-            <div class="upgrade-cost">Cost: <span id="cost-mass">15</span></div>
+            <div class="upgrade-desc">He gets massive. +1 CPS</div>
+            <div class="upgrade-cost">Cost: <span id="c-mass">15</span></div>
         </div>
-        
-        <div class="upgrade-card disabled" id="upgrade-strength" onclick="TrentonGame.buyUpgrade('strength')">
+        <div class="upgrade-card disabled" id="up-strength" onclick="Game.buy('strength')">
             <div class="upgrade-title">Strength Gain</div>
-            <div class="upgrade-desc">
-                He gets stronger.<br>
-                <span class="upgrade-benefit">+3 CPC</span>
-            </div>
-            <div class="upgrade-cost">Cost: <span id="cost-strength">50</span></div>
+            <div class="upgrade-desc">He gets stronger. +3 CPC</div>
+            <div class="upgrade-cost">Cost: <span id="c-strength">50</span></div>
         </div>
-        
-        <div class="upgrade-card disabled" id="upgrade-shit" onclick="TrentonGame.buyUpgrade('shit')">
+        <div class="upgrade-card disabled" id="up-shit" onclick="Game.buy('shit')">
             <div class="upgrade-title">Shit Power</div>
-            <div class="upgrade-desc">
-                Increases the power of his shit.<br>
-                <span class="upgrade-benefit">+2 CPS & +2 CPC</span>
-            </div>
-            <div class="upgrade-cost">Cost: <span id="cost-shit">100</span></div>
+            <div class="upgrade-desc">+2 CPS & +2 CPC</div>
+            <div class="upgrade-cost">Cost: <span id="c-shit">100</span></div>
+        </div>
+
+        <div class="upgrade-card disabled" id="up-neural" onclick="Game.buy('neural')">
+            <div class="upgrade-title">Neural Overclock</div>
+            <div class="upgrade-desc">Trenton processes reality faster. +8 CPS</div>
+            <div class="upgrade-cost">Cost: <span id="c-neural">500</span></div>
+        </div>
+        <div class="upgrade-card disabled" id="up-quantum" onclick="Game.buy('quantum')">
+            <div class="upgrade-title">Quantum Biceps</div>
+            <div class="upgrade-desc">Exists in multiple gyms at once. +15 CPC</div>
+            <div class="upgrade-cost">Cost: <span id="c-quantum">2500</span></div>
+        </div>
+        <div class="upgrade-card disabled" id="up-gravity" onclick="Game.buy('gravity')">
+            <div class="upgrade-title">Gravitational Pull</div>
+            <div class="upgrade-desc">Power gravitates toward him. +50 CPS</div>
+            <div class="upgrade-cost">Cost: <span id="c-gravity">10000</span></div>
+        </div>
+        <div class="upgrade-card disabled" id="up-god" onclick="Game.buy('god')">
+            <div class="upgrade-title">The Trenton Singularity</div>
+            <div class="upgrade-desc">Become the source of all Power. +100 CPC / +100 CPS</div>
+            <div class="upgrade-cost">Cost: <span id="c-god">100000</span></div>
         </div>
     </div>
 </div>
 
 <div id="stats-panel">
-    <div>CPS: <span id="stat-cps">0</span></div>
-    <div>CPC: <span id="stat-cpc">1</span></div>
+    <div class="stat-box">CPS: <span id="st-cps">0</span></div>
+    <div class="stat-box">CPC: <span id="st-cpc">1</span></div>
 </div>
 
 <script>
-    // --- Snowflake Animation ---
-    const snowContainer = document.getElementById('snow-container');
-    const snowflakeCount = 75;
-
-    function createSnowflakes() {
-        for (let i = 0; i < snowflakeCount; i++) {
-            const flake = document.createElement('div');
-            flake.className = 'snowflake';
-            
-            const size = Math.random() * 8 + 2 + 'px'; // size between 2px and 10px
-            const left = Math.random() * 100 + '%';
-            const duration = Math.random() * 5 + 3 + 's'; // 3s to 8s fall
-            const delay = Math.random() * 5 + 's';
-            const blur = Math.random() * 3 + 'px';
-
-            flake.style.width = size;
-            flake.style.height = size;
-            flake.style.left = left;
-            flake.style.animationDuration = duration;
-            flake.style.animationDelay = delay;
-            flake.style.filter = `blur(${blur})`;
-            
-            snowContainer.appendChild(flake);
-        }
+    // Snow Logic
+    const snow = document.getElementById('snow-container');
+    for (let i = 0; i < 50; i++) {
+        const flake = document.createElement('div');
+        flake.className = 'snowflake';
+        flake.style.cssText = `width:${Math.random()*5+2}px;height:${Math.random()*5+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;animation-delay:${Math.random()*5}s;opacity:${Math.random()}`;
+        snow.appendChild(flake);
     }
-    createSnowflakes();
 
-    // --- GAME LOGIC (within a closure for basic Anti-Cheat) ---
-    // Access is only available via the window.TrentonGame object and its specific methods.
-    const TrentonGame = (() => {
+    // Encapsulated Game Engine (Anti-Cheat)
+    const Game = (() => {
         let score = 0;
-        let cpc = 1;
         let cps = 0;
-        let costs = { mass: 15, strength: 50, shit: 100 };
-
-        const updateUI = () => {
-            // Update Score
-            document.getElementById('score-container').innerText = Math.floor(score) + " Power";
-            // Update Stats
-            document.getElementById('stat-cps').innerText = Math.floor(cps);
-            document.getElementById('stat-cpc').innerText = Math.floor(cpc);
-            // Update Costs
-            document.getElementById('cost-mass').innerText = Math.floor(costs.mass);
-            document.getElementById('cost-strength').innerText = Math.floor(costs.strength);
-            document.getElementById('cost-shit').innerText = Math.floor(costs.shit);
-
-            // Update disabled state for upgrade buttons
-            updateUpgradeButton('mass', costs.mass);
-            updateUpgradeButton('strength', costs.strength);
-            updateUpgradeButton('shit', costs.shit);
+        let cpc = 1;
+        let clickRegistry = []; // For speed-hack detection
+        
+        const data = {
+            mass: { c: 15, cps: 1, cpc: 0 },
+            strength: { c: 50, cps: 0, cpc: 3 },
+            shit: { c: 100, cps: 2, cpc: 2 },
+            neural: { c: 500, cps: 8, cpc: 0 },
+            quantum: { c: 2500, cps: 0, cpc: 15 },
+            gravity: { c: 10000, cps: 50, cpc: 0 },
+            god: { c: 100000, cps: 100, cpc: 100 }
         };
 
-        const updateUpgradeButton = (id, cost) => {
-            const btn = document.getElementById('upgrade-'+id);
-            if (score >= cost) {
-                btn.classList.remove('disabled');
-            } else {
-                btn.classList.add('disabled');
-            }
+        const refresh = () => {
+            document.getElementById('score-container').innerText = Math.floor(score).toLocaleString() + " Power";
+            document.getElementById('st-cps').innerText = Math.floor(cps).toLocaleString();
+            document.getElementById('st-cpc').innerText = Math.floor(cpc).toLocaleString();
+            
+            Object.keys(data).forEach(k => {
+                const el = document.getElementById('up-' + k);
+                const costEl = document.getElementById('c-' + k);
+                costEl.innerText = Math.floor(data[k].c).toLocaleString();
+                score >= data[k].c ? el.classList.remove('disabled') : el.classList.add('disabled');
+            });
         };
 
-        // Automatic CPS Tick (runs every 1 second)
-        setInterval(() => {
-            score += cps;
-            updateUI();
-        }, 1000);
+        setInterval(() => { score += (cps / 10); refresh(); }, 100);
 
-        // Initial UI update
-        // Use setTimeout to ensure all DOM elements are rendered
-        setTimeout(updateUI, 0);
-
-        // Publicly exposed methods
         return {
             click: () => {
+                const now = Date.now();
+                clickRegistry = clickRegistry.filter(t => now - t < 1000);
+                clickRegistry.push(now);
+
+                if (clickRegistry.length > 25) {
+                    console.warn("Anti-Cheat: Rate limit exceeded.");
+                    return;
+                }
                 score += cpc;
-                updateUI();
+                refresh();
             },
-            buyUpgrade: (type) => {
-                const cost = costs[type];
-                if (score >= cost) {
-                    score -= cost;
-                    // Apply upgrade effects
-                    switch(type) {
-                        case 'mass': cps += 1; break;
-                        case 'strength': cpc += 3; break;
-                        case 'shit': cps += 2; cpc += 2; break;
-                    }
-                    // Scale costs up (by 1.5x)
-                    costs[type] *= 1.5;
-                    updateUI();
-                } else {
-                    console.log(`Not enough power for ${type}. Need ${Math.floor(cost)}.`);
+            buy: (id) => {
+                const item = data[id];
+                if (score >= item.c) {
+                    score -= item.c;
+                    cps += item.cps;
+                    cpc += item.cpc;
+                    item.c *= 1.6;
+                    refresh();
                 }
             }
         };
-    })();
-
-    // Make the game object globally accessible (but only through defined methods)
-    window.TrentonGame = TrentonGame;
-
-    // --- Basic Anti-Cheat Check ---
-    // Tries to make it harder to modify the internal score variable.
-    // However, console users can still create an auto-clicker script.
-    (function antiCheatConsole() {
-        console.log("%cTrenton Ascended Anti-Cheat Enabled.", "color: #2ecc71; font-weight: bold; font-size: 1.2rem;");
-        console.log("Internal game variables are protected. Try changing 'score' in the console... (Hint: it won't work).");
     })();
 </script>
 </body>

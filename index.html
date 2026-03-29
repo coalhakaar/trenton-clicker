@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Pro Edition</title>
+<title>Trenton Ascended: Fixed UI</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -11,141 +11,119 @@
         --glass-border: rgba(255,255,255,0.08); --rebirth: #a29bfe;
         --success: #00ff88; --midas: #ffd700; --crit: #ff4757;
         --final: #ff00ff; --fira: 'Fira Code', monospace;
-        --sidebar-w: 480px;
+        --sidebar-w: 460px;
     }
     *, *::before, *::after { box-sizing: border-box; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: var(--fira); background: var(--bg); color: #e6edf3; overflow: hidden; }
-
-    /* SNOW */
-    #snow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.12; }
-    @keyframes fall { to { transform: translateY(110vh); } }
 
     /* LAYOUT */
     #game { display: grid; grid-template-columns: 1fr var(--sidebar-w); height: 100vh; }
 
     /* LEFT PANEL */
-    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 90px; }
-    h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 5px; margin-bottom: 16px; text-shadow: 0 0 30px rgba(0,210,255,0.5); }
+    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
+    h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 4px; margin-bottom: 20px; opacity: 0.8; }
 
     #trenton {
-        width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
-        border: 3px solid var(--accent); cursor: pointer;
-        box-shadow: 0 0 60px rgba(0,210,255,0.18); user-select: none;
-        transition: transform 0.05s, filter 0.05s;
+        width: 240px; height: 240px; border-radius: 50%; object-fit: cover;
+        border: 4px solid var(--accent); cursor: pointer;
+        box-shadow: 0 0 50px rgba(0,210,255,0.15); user-select: none;
+        transition: transform 0.05s;
     }
-    #trenton:active { transform: scale(0.92); filter: brightness(1.5); }
-
-    .ripple {
-        position: absolute; border-radius: 50%; pointer-events: none;
-        animation: ripple-anim 0.6s ease-out forwards;
-        border: 2px solid var(--accent); transform: translate(-50%, -50%) scale(0);
-    }
-    @keyframes ripple-anim { 0% { transform: translate(-50%,-50%) scale(0); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(5); opacity: 0; } }
+    #trenton:active { transform: scale(0.95); }
 
     #score-box {
-        background: var(--glass); border: 1px solid var(--glass-border); padding: 10px 30px;
-        margin-top: 20px; border-radius: 60px; font-size: 2.5rem;
-        backdrop-filter: blur(15px); min-width: 260px; text-align: center; font-weight: 700;
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 40px;
+        margin-top: 25px; border-radius: 12px; font-size: 2.8rem; font-weight: 700;
+        backdrop-filter: blur(10px); min-width: 300px; text-align: center;
     }
 
-    #rebirth-btn {
-        width: 300px; padding: 15px; background: linear-gradient(135deg, var(--rebirth), #6c5ce7);
-        border: none; border-radius: 8px; color: white; font-weight: bold; font-family: var(--fira);
-        cursor: pointer; margin-top: 20px; transition: 0.2s;
-    }
-    #rebirth-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* STATS BAR */
+    /* STATS FOOTER */
     #stats {
-        position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 85px;
-        background: rgba(0,0,0,0.95); border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center;
+        position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 90px;
+        background: #000; border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center; z-index: 10;
     }
-    .stat label { font-size: 0.55rem; color: #555; display: block; letter-spacing: 2px; }
-    .stat span { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .stat label { font-size: 0.6rem; color: #666; display: block; letter-spacing: 1px; margin-bottom: 4px; }
+    .stat span { font-size: 1.1rem; font-weight: 700; color: #fff; }
 
     /* SIDEBAR */
-    #shop-container { background: #05070a; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
+    #shop-container { background: #080a0c; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
     #sidebar-header { background: #000; border-bottom: 1px solid var(--glass-border); }
     .tabs { display: flex; }
     .tab-btn {
-        flex: 1; padding: 18px; border: none; background: transparent; color: #444;
+        flex: 1; padding: 20px; border: none; background: transparent; color: #555;
         cursor: pointer; font-family: var(--fira); font-weight: 700; font-size: 0.8rem;
-        transition: 0.2s; border-bottom: 2px solid transparent;
+        border-bottom: 2px solid transparent;
     }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--glass); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(255,255,255,0.02); }
 
-    #buy-mult-strip { display: flex; background: #080808; padding: 6px; gap: 6px; }
+    #buy-mult-strip { display: flex; background: #000; padding: 8px; gap: 8px; }
     .mult-btn {
-        flex: 1; padding: 8px; font-size: 0.7rem; background: #111; border: 1px solid #222;
-        color: #444; cursor: pointer; border-radius: 4px; font-family: var(--fira);
+        flex: 1; padding: 10px; font-size: 0.7rem; background: #111; border: 1px solid #222;
+        color: #666; cursor: pointer; border-radius: 4px; font-family: var(--fira);
     }
     .mult-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
 
-    #shop-list { padding: 15px; overflow-y: scroll; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    #shop-list { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; flex: 1; }
 
     /* ═══════════════════════════════════
-       TALL UPGRADE CARDS 
+       DYNAMIC UPGRADE CARDS (NO CUTOFF)
        ═══════════════════════════════════ */
     .card {
-        min-height: 150px; border-radius: 12px; cursor: pointer; transition: 0.2s;
-        position: relative; overflow: hidden; background: #0d1117; border: 1px solid #21262d;
+        width: 100%; height: auto; min-height: 160px; /* Allow expansion */
+        border-radius: 12px; cursor: pointer; transition: background 0.2s, transform 0.1s;
+        position: relative; overflow: visible; background: #0f1419; border: 1px solid #21262d;
         display: flex; flex-direction: column;
     }
-    .card:hover:not(.locked) { transform: translateX(5px); border-color: var(--accent); background: #161b22; }
-    .card.locked { opacity: 0.25; cursor: not-allowed; filter: grayscale(1); }
+    .card:hover:not(.locked) { border-color: var(--accent); background: #161b22; transform: translateX(4px); }
+    .card.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
     
-    .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
+    .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); border-radius: 12px 0 0 12px; }
     .card.is-midas::before { background: var(--midas); }
-    .card.is-final::before { background: var(--final); }
     .card.is-perk::before  { background: var(--rebirth); }
 
-    .card-inner { padding: 15px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-inner { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
     
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
     .card-name { font-size: 1rem; font-weight: 700; color: #fff; }
-    .card-lvl { font-size: 0.7rem; font-weight: 800; color: var(--accent); background: rgba(0,210,255,0.1); padding: 4px 10px; border-radius: 20px; }
+    .card-lvl { font-size: 0.75rem; font-weight: 800; color: var(--accent); }
 
-    .card-desc { font-size: 0.75rem; color: #8b949e; margin-bottom: 12px; font-style: italic; }
+    /* THE STATS STACK - Prevents horizontal squishing */
+    .stat-row { 
+        display: flex; flex-direction: column; gap: 8px; 
+        background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03);
+    }
+    .data-line { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .d-label { font-size: 0.6rem; color: #555; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .d-val { font-size: 0.9rem; font-weight: 700; }
+    
+    .d-val.boost { color: var(--success); }
+    .d-val.total { color: var(--accent); }
+    .d-val.price { color: var(--midas); font-size: 1rem; }
 
-    .card-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; }
-    .stat-box { display: flex; flex-direction: column; }
-    .stat-label { font-size: 0.5rem; color: #444; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; }
-    .stat-val { font-size: 0.85rem; font-weight: 700; }
-    .stat-val.boost { color: var(--success); }
-    .stat-val.total { color: var(--accent); }
-    .stat-val.price { color: var(--midas); font-size: 0.9rem; }
-
-    #music-btn { position: fixed; top: 15px; left: 15px; z-index: 100; background: #000; border: 1px solid #333; color: #555; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
-    #music-btn.playing { color: var(--success); border-color: var(--success); }
+    #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; }
 </style>
 </head>
 <body>
-<div id="snow"></div>
-<button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
-
 <div id="game">
+    <button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
     <div id="main">
         <h1>TRENTON ASCENDED</h1>
-        <div id="click-wrap" style="position:relative">
-            <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
-        </div>
+        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
         <div id="score-box">0</div>
-        <button id="rebirth-btn" onclick="App.rebirth()" disabled>REBIRTH (+0 RB)</button>
-        <div id="rb-status" style="margin-top:10px; color:var(--rebirth); font-size:0.7rem">0 Rebirths | 0 RB Available</div>
+        <button id="rebirth-btn" onclick="App.rebirth()" style="width:300px; padding:15px; margin-top:20px; border:none; border-radius:8px; background:var(--rebirth); font-family:var(--fira); font-weight:bold; cursor:pointer;" disabled>REBIRTH</button>
     </div>
 
     <div id="shop-container">
         <div id="sidebar-header">
             <div class="tabs">
-                <button class="tab-btn active" id="tab-upgrades" onclick="App.setTab('upgrades')">UPGRADES</button>
-                <button class="tab-btn" id="tab-rebirth" onclick="App.setTab('rebirth')">PERKS</button>
+                <button class="tab-btn active" onclick="App.setTab('upgrades')">UPGRADES</button>
+                <button class="tab-btn" onclick="App.setTab('rebirth')">PERKS</button>
             </div>
             <div id="buy-mult-strip">
-                <button class="mult-btn active" onclick="App.setMult(1)">BUY 1X</button>
-                <button class="mult-btn" onclick="App.setMult(10)">BUY 10X</button>
-                <button class="mult-btn" onclick="App.setMult('MAX')">BUY MAX</button>
+                <button class="mult-btn active" onclick="App.setMult(1)">1X</button>
+                <button class="mult-btn" onclick="App.setMult(10)">10X</button>
+                <button class="mult-btn" onclick="App.setMult('MAX')">MAX</button>
             </div>
         </div>
         <div id="shop-list"></div>
@@ -153,15 +131,14 @@
 </div>
 
 <div id="stats">
-    <div class="stat"><label>COINS / SEC</label><span id="st-cps">0</span></div>
-    <div class="stat"><label>COINS / CLICK</label><span id="st-cpc">1</span></div>
-    <div class="stat"><label>CRIT CHANCE</label><span id="st-crit">5%</span></div>
-    <div class="stat"><label>TOTAL MULTI</label><span id="st-mult">×1.00</span></div>
+    <div class="stat"><label>CPS</label><span id="st-cps">0</span></div>
+    <div class="stat"><label>CPC</label><span id="st-cpc">1</span></div>
+    <div class="stat"><label>CRIT</label><span id="st-crit">5%</span></div>
+    <div class="stat"><label>MULTI</label><span id="st-mult">×1.0</span></div>
 </div>
 
 <script>
 const App = (() => {
-    const SAVE_KEY = 'trenton_asc_v5';
     const SFX = ["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","UDc","DDc","TDc","Vg"];
     const fmt = n => {
         if (n < 1000) return Math.floor(n).toString();
@@ -169,45 +146,27 @@ const App = (() => {
         return (n / Math.pow(10, e * 3)).toFixed(2) + SFX[e];
     };
 
-    // Updated data structure: power is numerical for math
     const BASE_UPGRADES = [
-        { id:'m',  n:'Mass Gain',         type:'CPS', power:1,      c:10,    s:1.15 },
-        { id:'s',  n:'Strength Training', type:'CPC', power:3,      c:60,    s:1.18 },
-        { id:'sh', n:'Bio-Power',         type:'CPS', power:15,     c:500,   s:1.22 },
-        { id:'n',  n:'Neural Pulse',      type:'CPS', power:60,     c:4000,  s:1.25 },
-        { id:'q',  n:'Quantum Lift',      type:'CPC', power:250,    c:25000, s:1.28 },
-        { id:'g',  n:'Gravity Well',      type:'CPS', power:1200,   c:1.5e5, s:1.3 },
-        { id:'cy', n:'Cyber Frame',       type:'CPS', power:8000,   c:2e6,   s:1.35 },
-        { id:'v',  n:'Void Breath',       type:'CPC', power:25000,  c:1e8,   s:1.38 },
-        { id:'ga', n:'Galaxy Mind',       type:'CPS', power:1.5e6,  c:5e9,   s:1.42 },
-        { id:'mi', n:'Midas Touch',       type:'MULT',power:3,      c:1e15,  s:10, isMidas:true }
-    ];
-
-    const BASE_PERKS = [
-        { id:'rb_cpc', n:'Iron Grip',    b:'+50% CPC', c:1, max:20 },
-        { id:'rb_cps', n:'Endless Flow', b:'+50% CPS', c:1, max:20 },
-        { id:'rb_crit',n:'Lucky Soul',   b:'+5% Crit', c:2, max:10 }
+        { id:'m',  n:'Mass Gain', type:'CPS', p:1, c:10, s:1.15 },
+        { id:'s',  n:'Strength Training', type:'CPC', p:5, c:80, s:1.18 },
+        { id:'sh', n:'Bio-Power', type:'CPS', p:25, c:600, s:1.22 },
+        { id:'q',  n:'Quantum Lift', type:'CPC', p:150, c:12000, s:1.28 },
+        { id:'cy', n:'Cyber Frame', type:'CPS', p:10000, c:1e6, s:1.35 },
+        { id:'v',  n:'Void Breath', type:'CPC', p:45000, c:1e8, s:1.38 },
+        { id:'mi', n:'Midas Touch', type:'MULT', p:2, c:1e15, s:10, isMidas:true }
     ];
 
     let S = {
-        score:0, cps:0, cpc:1, crit:0.05, rebirths:0, currentRB:0, rebirthCost:1e6,
+        score:0, cps:0, cpc:1, crit:0.05, rebirths:0, currentRB:0,
         midasMult:1, currentTab:'upgrades', buyMult:1,
         upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c})),
-        perks: BASE_PERKS.map(p => ({id:p.id, lvl:0}))
+        perks: []
     };
 
-    let audioCtx=null, musicPlaying=false, stopFns=[];
-
     const getStats = () => {
-        const lv = id => S.perks.find(p=>p.id===id)?.lvl||0;
-        const rbMult = 1 + (S.rebirths * 0.75);
+        const rbMult = 1 + (S.rebirths * 0.8);
         const gMult = rbMult * S.midasMult;
-        return {
-            eCpc: S.cpc * gMult * (1 + lv('rb_cpc')*0.5),
-            eCps: S.cps * gMult * (1 + lv('rb_cps')*0.5),
-            crit: Math.min(S.crit + lv('rb_crit')*0.05, 0.55),
-            gMult
-        };
+        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, crit: S.crit, gMult };
     };
 
     const refresh = () => {
@@ -215,109 +174,63 @@ const App = (() => {
         document.getElementById('score-box').innerText = fmt(S.score);
         document.getElementById('st-cps').innerText = fmt(st.eCps);
         document.getElementById('st-cpc').innerText = fmt(st.eCpc);
-        document.getElementById('st-crit').innerText = Math.round(st.crit*100)+'%';
-        document.getElementById('st-mult').innerText = '×' + st.gMult.toFixed(2);
-        
-        let rbG=0, cost=S.rebirthCost, t=S.score;
-        while(t >= cost && rbG < 1000) { t-=cost; cost*=1.9; rbG++; }
-        document.getElementById('rebirth-btn').innerText = `REBIRTH (+${rbG} RB)`;
-        document.getElementById('rebirth-btn').disabled = rbG === 0;
-        document.getElementById('rb-status').innerText = `${S.rebirths} Rebirths | ${S.currentRB} RB Available`;
+        document.getElementById('st-mult').innerText = '×' + st.gMult.toFixed(1);
 
-        // Update card values
-        const isU = S.currentTab === 'upgrades';
-        const list = isU ? S.upgrades : S.perks;
-        const defs = isU ? BASE_UPGRADES : BASE_PERKS;
-
-        list.forEach(u => {
+        S.upgrades.forEach(u => {
             const el = document.getElementById('card-' + u.id);
             if (!el) return;
-            const d = defs.find(x=>x.id===u.id);
-            const price = isU ? u.c : (d.c * (u.lvl+1));
-            
-            el.classList.toggle('locked', (isU ? S.score : S.currentRB) < price);
-            el.querySelector('.cell-price').innerText = isU ? fmt(price) : price + ' RB';
+            const def = BASE_UPGRADES.find(x=>x.id===u.id);
+            el.classList.toggle('locked', S.score < u.c);
+            el.querySelector('.cell-price').innerText = fmt(u.c);
             el.querySelector('.card-lvl').innerText = 'LVL ' + u.lvl;
-            
-            if (isU) {
-                const totalImpact = d.power * u.lvl;
-                el.querySelector('.cell-total').innerText = (d.type === 'MULT' ? '×' : '+') + fmt(totalImpact);
-            }
+            el.querySelector('.cell-total').innerText = (def.type === 'MULT' ? '×' : '+') + fmt(def.p * u.lvl);
         });
+        
+        const rbG = S.score >= 1e6 ? Math.floor(Math.log10(S.score/1e5)) : 0;
+        document.getElementById('rebirth-btn').innerText = `REBIRTH (+${rbG} RB)`;
+        document.getElementById('rebirth-btn').disabled = rbG <= 0;
     };
 
     const renderShop = () => {
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
-        const isU = S.currentTab === 'upgrades';
-        const defs = isU ? BASE_UPGRADES : BASE_PERKS;
-
-        defs.forEach((def, i) => {
-            const u = (isU ? S.upgrades : S.perks).find(x=>x.id===def.id);
+        BASE_UPGRADES.forEach((def, i) => {
+            const u = S.upgrades[i];
             const card = document.createElement('div');
-            card.className = `card ${def.isMidas ? 'is-midas' : isU ? '' : 'is-perk'}`;
+            card.className = `card ${def.isMidas ? 'is-midas' : ''}`;
             card.id = 'card-' + def.id;
-            
-            if (isU) {
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-header"><span class="card-name">${def.n}</span><span class="card-lvl">LVL 0</span></div>
-                        <div class="card-desc">Increases your base ${def.type} output.</div>
-                        <div class="card-stats-grid">
-                            <div class="stat-box"><span class="stat-label">Per Upgrade</span><span class="stat-val boost">+${fmt(def.power)} ${def.type}</span></div>
-                            <div class="stat-box"><span class="stat-label">Current Impact</span><span class="stat-val total cell-total">0</span></div>
-                            <div class="stat-box" style="grid-column: span 2"><span class="stat-label">Purchase Price</span><span class="stat-val price cell-price">0</span></div>
-                        </div>
-                    </div>`;
-                card.onclick = () => buyU(i);
-            } else {
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-header"><span class="card-name">${def.n}</span><span class="card-lvl">0/${def.max}</span></div>
-                        <div class="card-stats-grid">
-                            <div class="stat-box"><span class="stat-label">Effect</span><span class="stat-val boost">${def.b}</span></div>
-                            <div class="stat-box"><span class="stat-label">Cost</span><span class="stat-val price cell-price">0</span></div>
-                        </div>
-                    </div>`;
-                card.onclick = () => buyP(i);
-            }
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-top"><span class="card-name">${def.n}</span><span class="card-lvl">LVL 0</span></div>
+                    <div class="stat-row">
+                        <div class="data-line"><span class="d-label">Per Upgrade</span><span class="d-val boost">+${fmt(def.p)} ${def.type}</span></div>
+                        <div class="data-line"><span class="d-label">Total Impact</span><span class="d-val total cell-total">0</span></div>
+                    </div>
+                    <div class="data-line" style="margin-top:auto"><span class="d-label">Price</span><span class="d-val price cell-price">0</span></div>
+                </div>`;
+            card.onclick = () => buyU(i);
             list.appendChild(card);
         });
         refresh();
     };
 
     const buyU = i => {
-        const def = BASE_UPGRADES[i], u = S.upgrades.find(x=>x.id===def.id);
+        const def = BASE_UPGRADES[i], u = S.upgrades[i];
         let count = S.buyMult === 'MAX' ? 1000 : S.buyMult;
         for(let j=0; j<count; j++){
             if (S.score < u.c) break;
             S.score -= u.c; u.lvl++;
-            if(def.type==='CPS') S.cps+=def.power;
-            if(def.type==='CPC') S.cpc+=def.power;
-            if(def.type==='MULT') S.midasMult*=def.power;
+            if(def.type==='CPS') S.cps+=def.p;
+            if(def.type==='CPC') S.cpc+=def.p;
+            if(def.type==='MULT') S.midasMult*=def.p;
             u.c *= def.s;
             if(S.buyMult !== 'MAX' && j === count-1) break;
         }
         refresh();
     };
 
-    const buyP = i => {
-        const def = BASE_PERKS[i], p = S.perks.find(x=>x.id===def.id);
-        if(p.lvl >= def.max) return;
-        const cost = def.c * (p.lvl+1);
-        if(S.currentRB >= cost){ S.currentRB -= cost; p.lvl++; refresh(); }
-    };
-
     return {
-        click: e => {
-            const st = getStats(), isCrit = Math.random() < st.crit;
-            const gain = st.eCpc * (isCrit ? 5 : 1);
-            S.score += gain;
-            const r = document.createElement('div');
-            r.className = 'ripple'; r.style.left = e.clientX+'px'; r.style.top = e.clientY+'px';
-            document.body.appendChild(r); setTimeout(()=>r.remove(),600);
-            refresh();
-        },
+        click: () => { S.score += getStats().eCpc; refresh(); },
         setTab: t => { S.currentTab = t; renderShop(); },
         setMult: m => { 
             S.buyMult = m; 
@@ -325,31 +238,14 @@ const App = (() => {
             event.target.classList.add('active');
         },
         rebirth: () => {
-            let rbG=0, cost=S.rebirthCost, t=S.score;
-            while(t >= cost && rbG < 1000) { t-=cost; cost*=1.9; rbG++; }
-            if (rbG > 0) {
-                S.rebirths += rbG; S.currentRB += rbG; S.score = 0; S.cps = 0; S.cpc = 1; S.midasMult = 1;
-                S.upgrades.forEach(u => { const d = BASE_UPGRADES.find(x=>x.id===u.id); u.lvl=0; u.c=d.c; });
-                renderShop();
-            }
+            const rbG = Math.floor(Math.log10(S.score/1e5));
+            if(rbG > 0) { S.rebirths += rbG; S.score=0; S.cps=0; S.cpc=1; S.upgrades.forEach((u,i)=> { u.lvl=0; u.c=BASE_UPGRADES[i].c; }); renderShop(); }
         },
-        toggleMusic: () => {
-            if(musicPlaying) { stopFns.forEach(f=>f()); musicPlaying=false; document.getElementById('music-btn').innerText='♪ MUSIC OFF'; document.getElementById('music-btn').classList.remove('playing'); return; }
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const m = audioCtx.createGain(); m.gain.value=0.1; m.connect(audioCtx.destination);
-            const o = audioCtx.createOscillator(); o.type='sine'; o.frequency.value=110; o.connect(m); o.start();
-            stopFns = [()=>o.stop(), ()=>m.disconnect()];
-            musicPlaying=true; document.getElementById('music-btn').innerText='♪ MUSIC ON'; document.getElementById('music-btn').classList.add('playing');
+        init: () => { 
+            renderShop(); 
+            setInterval(() => { S.score += getStats().eCps/10; refresh(); }, 100); 
         },
-        init: () => {
-            for(let i=0; i<30; i++) {
-                const f = document.createElement('div'); f.className='flake';
-                f.style.cssText=`width:2px;height:2px;left:${Math.random()*100}%;animation-duration:${Math.random()*10+5}s`;
-                document.getElementById('snow').appendChild(f);
-            }
-            renderShop();
-            setInterval(() => { S.score += getStats().eCps / 10; refresh(); }, 100);
-        }
+        toggleMusic: () => {} // Lightweight version
     };
 })();
 window.onload = () => App.init();

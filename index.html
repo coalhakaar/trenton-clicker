@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: The Overdrive</title>
+<title>Trenton Ascended: Audio & UI Overhaul</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
         --bg: #030508;
         --accent: #00d2ff;
-        --glass: rgba(255, 255, 255, 0.03);
-        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass: rgba(255, 255, 255, 0.04);
+        --glass-border: rgba(255, 255, 255, 0.1);
         --rebirth: #a29bfe;
-        --overdrive: #ff4757;
         --success: #00ff88;
         --fira: 'Fira Code', monospace;
     }
@@ -23,91 +22,87 @@
     }
 
     #snow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.6; }
+    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.4; }
     @keyframes fall { to { transform: translateY(110vh); } }
 
-    /* Save Slots UI */
-    #save-header {
-        position: fixed; top: 10px; left: 10px; display: flex; gap: 10px; z-index: 100;
-    }
+    /* Save Slots */
+    #save-header { position: fixed; top: 15px; left: 15px; display: flex; gap: 12px; z-index: 100; }
     .save-slot {
-        padding: 5px 15px; background: var(--glass); border: 1px solid var(--glass-border);
-        border-radius: 5px; cursor: pointer; font-size: 0.7rem; transition: 0.2s;
+        padding: 8px 18px; background: var(--glass); border: 1px solid var(--glass-border);
+        border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: 0.3s; backdrop-filter: blur(5px);
     }
-    .save-slot.active { border-color: var(--accent); background: rgba(0, 210, 255, 0.1); }
+    .save-slot.active { border-color: var(--accent); background: rgba(0, 210, 255, 0.15); box-shadow: 0 0 15px rgba(0,210,255,0.2); }
 
-    #game { display: grid; grid-template-columns: 1fr 420px; height: calc(100vh - 100px); }
+    /* Music Controls */
+    #audio-controls { position: fixed; top: 15px; right: 450px; z-index: 100; }
+    .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 8px; border-radius: 50%; cursor: pointer; }
 
-    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-    h1 { font-size: 2.2rem; color: var(--accent); letter-spacing: 4px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--accent)); }
+    #game { display: grid; grid-template-columns: 1fr 440px; height: 100vh; }
+
+    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
+    h1 { font-size: 2rem; color: var(--accent); letter-spacing: 5px; margin-bottom: 25px; filter: drop-shadow(0 0 8px var(--accent)); }
     
     #trenton {
-        width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
-        border: 2px solid var(--accent); cursor: pointer; transition: 0.05s;
-        box-shadow: 0 0 30px rgba(0, 210, 255, 0.15); user-select: none;
+        width: 240px; height: 240px; border-radius: 50%; object-fit: cover;
+        border: 3px solid var(--accent); cursor: pointer; transition: 0.05s;
+        box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); user-select: none;
     }
-    #trenton:active { transform: scale(0.94); filter: brightness(1.4); }
-
-    /* The Button Mechanic */
-    #the-button {
-        position: absolute; top: 20%; right: 10%; width: 100px; height: 100px;
-        background: radial-gradient(circle, #ff4757, #b33939);
-        border: 4px solid #fff; border-radius: 50%; cursor: pointer;
-        display: none; box-shadow: 0 0 20px var(--overdrive);
-        font-weight: bold; color: white; align-items: center; justify-content: center;
-        text-align: center; font-size: 0.8rem; animation: pulse 1s infinite;
-    }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    #trenton:active { transform: scale(0.95); filter: brightness(1.3); }
 
     #score-box { 
-        background: var(--glass); border: 1px solid var(--glass-border); padding: 10px 40px;
-        margin-top: 30px; border-radius: 50px; font-size: 2.8rem; backdrop-filter: blur(10px);
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 50px;
+        margin-top: 30px; border-radius: 50px; font-size: 3rem; backdrop-filter: blur(10px);
     }
 
-    #rebirth-container { margin-top: 20px; width: 280px; text-align: center; }
-    #rebirth-btn {
-        width: 100%; padding: 12px; background: var(--rebirth); border: none; border-radius: 8px;
-        color: white; font-family: var(--fira); font-weight: bold; cursor: pointer; transition: 0.3s;
-        position: relative; overflow: hidden;
-    }
-    #rebirth-btn:disabled { background: #222; opacity: 0.5; cursor: not-allowed; }
-    #rb-progress { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.3s; }
-
-    /* Unique Mechanic: Resonance */
-    #resonance-bar {
-        width: 280px; height: 10px; background: #111; margin-top: 15px; border-radius: 5px;
-        display: none; overflow: hidden; border: 1px solid var(--glass-border);
-    }
-    #resonance-fill { height: 100%; width: 0%; background: var(--success); transition: width 0.1s; }
-
+    /* Sidebar Shop */
     #shop { 
-        background: rgba(0,0,0,0.3); border-left: 1px solid var(--glass-border); 
-        padding: 20px; overflow-y: scroll; display: flex; flex-direction: column; gap: 10px;
+        background: rgba(0,0,0,0.4); border-left: 1px solid var(--glass-border); 
+        padding: 25px; overflow-y: overlay; display: flex; flex-direction: column; gap: 15px;
+        backdrop-filter: blur(20px);
     }
+
     .card {
-        background: var(--glass); border: 1px solid var(--glass-border); padding: 12px;
-        border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
+        background: var(--glass); border: 1px solid var(--glass-border);
+        padding: 18px; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        position: relative; display: flex; flex-direction: column; gap: 6px;
     }
-    .card:hover:not(.locked) { background: rgba(255,255,255,0.06); border-color: var(--accent); }
-    .card.locked { opacity: 0.25; cursor: not-allowed; }
-    .u-name { font-weight: bold; color: var(--accent); font-size: 0.9rem; }
-    .u-cost { color: var(--success); font-size: 0.8rem; margin-top: 4px; }
+    .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-5px); border-color: var(--accent); }
+    .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
 
-    #hud {
-        position: absolute; bottom: 20px; left: 20px; width: 280px; height: 120px;
-        background: rgba(0,0,0,0.8); border: 1px solid var(--accent); border-radius: 12px;
-        padding: 15px; font-size: 0.8rem; pointer-events: none; opacity: 0; transition: 0.2s;
+    .u-title { font-weight: bold; color: var(--accent); font-size: 1rem; letter-spacing: 1px; }
+    .u-desc { font-size: 0.75rem; color: #a0a0a0; line-height: 1.4; }
+    .u-benefit { font-size: 0.8rem; color: var(--success); font-weight: bold; }
+    .u-cost { color: #fff; font-size: 0.9rem; margin-top: 5px; opacity: 0.9; }
+    .u-lvl-badge {
+        position: absolute; top: 12px; right: 12px; font-size: 0.7rem;
+        background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; color: var(--accent);
     }
 
+    /* Footer Stats */
     #stats { 
-        height: 100px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(15px);
+        position: fixed; bottom: 0; left: 0; width: calc(100% - 440px); height: 100px;
+        background: rgba(0,0,0,0.7); border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center;
     }
-    .stat span { color: var(--accent); font-weight: bold; font-size: 1.3rem; }
-    .stat label { font-size: 0.7rem; color: #8b949e; display: block; }
+    .stat label { font-size: 0.7rem; color: #8b949e; display: block; text-transform: uppercase; }
+    .stat span { color: var(--accent); font-weight: bold; font-size: 1.5rem; }
+
+    #rebirth-btn {
+        width: 100%; padding: 14px; background: var(--rebirth); border: none; border-radius: 8px;
+        color: white; font-family: var(--fira); font-weight: bold; cursor: pointer;
+        margin-top: 20px; transition: 0.3s;
+    }
+    #rebirth-btn:disabled { background: #222; opacity: 0.4; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
 <body>
+
+<audio id="bgm" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+</audio>
 
 <div id="save-header">
     <div class="save-slot active" onclick="App.switchSlot(0)">Slot 1</div>
@@ -115,65 +110,52 @@
     <div class="save-slot" onclick="App.switchSlot(2)">Slot 3</div>
 </div>
 
+<div id="audio-controls">
+    <button class="audio-btn" onclick="App.toggleMusic()">🎵</button>
+</div>
+
 <div id="snow"></div>
 
 <div id="game">
     <div id="main">
-        <div id="hud">Hover for details...</div>
-        <div id="the-button" onclick="App.activateOverdrive()">THE BUTTON</div>
         <h1>TRENTON ASCENDED</h1>
-        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click(event)">
+        <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click()">
         <div id="score-box">0</div>
         
-        <div id="resonance-bar"><div id="resonance-fill"></div></div>
-        <div id="rebirth-container">
-            <button id="rebirth-btn" onclick="App.rebirth()" disabled>
-                REBIRTH: <span id="rb-cost-text">100K</span>
-                <div id="rb-progress" style="width: 0%"></div>
-            </button>
-            <div style="font-size: 0.7rem; margin-top: 8px; color: var(--rebirth);" id="rb-mult">Mult: 1.0x (0 RB)</div>
+        <div style="width: 280px;">
+            <button id="rebirth-btn" onclick="App.rebirth()" disabled>REBIRTH: <span id="rb-cost-text">100K</span></button>
+            <div style="text-align: center; font-size: 0.7rem; margin-top: 10px; color: var(--rebirth)" id="rb-status">0 Rebirths</div>
         </div>
     </div>
     <div id="shop"></div>
 </div>
 
 <div id="stats">
-    <div class="stat"><label>POWER / SEC</label><span id="st-cps">0</span></div>
-    <div class="stat"><label>POWER / CLICK</label><span id="st-cpc">1</span></div>
-    <div class="stat"><label>CRITICAL HIT</label><span id="st-crit">5%</span></div>
+    <div class="stat"><label>CPS</label><span id="st-cps">0</span></div>
+    <div class="stat"><label>CPC</label><span id="st-cpc">1</span></div>
+    <div class="stat"><label>CRIT</label><span id="st-crit">5%</span></div>
 </div>
 
 <script>
     const App = (() => {
-        let state = {
-            slot: 0,
-            score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05,
-            rebirthCost: 100000, resonance: 0,
-            upgrades: []
-        };
-
+        let state = { slot: 0, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000, upgrades: [] };
         const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qn"];
-        let overdriveActive = false;
-        let overdriveTimer = 0;
 
         const baseUpgrades = [
-            { id: 'm', n: 'Mass Gain', d: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.15 },
-            { id: 's', n: 'Strength Gain', d: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.2 },
-            { id: 'sh', n: 'Shit Power', d: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.25 },
-            { id: 'n', n: 'Neural Pulse', d: '+40 CPS', cps: 40, c: 1200, s: 1.28 },
-            { id: 'cr', n: 'Focus Aura', d: '+3% Crit', cr: 0.03, c: 4500, s: 1.35 },
-            { id: 'q', n: 'Quantum Lift', d: '+100 CPC', cpc: 100, c: 15000, s: 1.3 },
-            { id: 'g', n: 'Gravity Well', d: '+500 CPS', cps: 500, c: 60000, s: 1.3 },
-            { id: 'nb', n: 'Nano-Repair', d: '+1.5K CPS / +500 CPC', cps: 1500, cpc: 500, c: 200000, s: 1.32 },
-            { id: 'cy', n: 'Cyber Frame', d: '+8K CPS', cps: 8000, c: 1000000, s: 1.35 },
-            { id: 'v', n: 'Void Breath', d: '+20K CPC', cpc: 20000, c: 8000000, s: 1.35 },
-            { id: 'sl', n: 'Solar Core', d: '+100K CPS', cps: 100000, c: 50000000, s: 1.4 },
-            { id: 'at', n: 'Atomic Grip', d: '+500K CPC', cpc: 500000, c: 500000000, s: 1.4 },
-            { id: 'ga', n: 'Galaxy Mind', d: '+2M CPS', cps: 2000000, c: 5000000000, s: 1.42 },
-            { id: 'ti', n: 'Timeless Muscle', d: '+10M CPC', cpc: 10000000, c: 75000000000, s: 1.45 },
-            { id: 'ds', n: 'Reality Anchor', d: '+100M CPS', cps: 100000000, c: 1000000000000, s: 1.5 },
-            { id: 'mu', n: 'Multiversal Body', d: '+5B CPS / +1B CPC', cps: 5000000000, cpc: 1000000000, c: 50000000000000, s: 1.55 },
-            { id: 'sg', n: 'The Singularity', d: 'Final Evolution.', cps: 50000000000, cpc: 10000000000, c: 1000000000000000, s: 1.6 }
+            { id: 'm', n: 'Mass Gain', d: 'Trenton bulks up his physical form.', b: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.15 },
+            { id: 's', n: 'Strength Training', d: 'Intense lifting sessions.', b: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.2 },
+            { id: 'sh', n: 'Bio-Power', d: 'Optimized metabolic output.', b: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.25 },
+            { id: 'n', n: 'Neural Pulse', d: 'Brain overclocking protocols.', b: '+45 CPS', cps: 45, c: 1500, s: 1.28 },
+            { id: 'cr', n: 'Focus Aura', d: 'Sharper mental concentration.', b: '+3% Crit', cr: 0.03, c: 5000, s: 1.35 },
+            { id: 'q', n: 'Quantum Lift', d: 'Lifting weights in 4D space.', b: '+120 CPC', cpc: 120, c: 18000, s: 1.3 },
+            { id: 'g', n: 'Gravity Well', d: 'Passive power attraction.', b: '+600 CPS', cps: 600, c: 65000, s: 1.3 },
+            { id: 'nb', n: 'Nano-Repair', d: 'Self-fixing cellular tissue.', b: '+2K CPS / +1K CPC', cps: 2000, cpc: 1000, c: 250000, s: 1.32 },
+            { id: 'cy', n: 'Cyber Frame', d: 'Reinforced titanium chassis.', b: '+10K CPS', cps: 10000, c: 1200000, s: 1.35 },
+            { id: 'v', n: 'Void Breath', d: 'Oxygen is no longer required.', b: '+50K CPC', cpc: 50000, c: 10000000, s: 1.35 },
+            { id: 'sl', n: 'Solar Synthesis', d: 'Direct energy from the sun.', b: '+150K CPS', cps: 150000, c: 60000000, s: 1.4 },
+            { id: 'ga', n: 'Galaxy Mind', d: 'Processing the cosmos.', b: '+3M CPS', cps: 3000000, c: 6000000000, s: 1.42 },
+            { id: 'ti', n: 'Time Warp', d: 'Gain power before you click.', b: '+20M CPC', cpc: 20000000, c: 80000000000, s: 1.45 },
+            { id: 'sg', n: 'The Singularity', d: 'The final stage of being.', b: '+100B CPS', cps: 100000000000, c: 1000000000000000, s: 1.6 }
         ];
 
         const format = (n) => {
@@ -182,22 +164,22 @@
             return (n / Math.pow(10, e * 3)).toFixed(2) + (suffixes[e] || "??");
         };
 
-        const initShop = () => {
+        const renderShop = () => {
             const shop = document.getElementById('shop');
             shop.innerHTML = '';
             state.upgrades.forEach((u, i) => {
-                const el = document.createElement('div');
-                el.className = 'card locked';
-                el.id = `u-${u.id}`;
-                el.innerHTML = `<div class="card-info"><span class="u-name">${u.n}</span><span class="u-cost" id="c-${u.id}">${format(u.c)}</span></div><div class="u-lvl" id="l-${u.id}">${u.lvl}</div>`;
-                el.onclick = () => buy(i);
-                el.onmouseenter = () => { 
-                    const hud = document.getElementById('hud');
-                    hud.style.opacity = 1; 
-                    hud.innerHTML = `<strong>${u.n}</strong><br>${u.d}<br><br>Tier: ${i+1} | Level: ${u.lvl}`; 
-                };
-                el.onmouseleave = () => document.getElementById('hud').style.opacity = 0;
-                shop.appendChild(el);
+                const card = document.createElement('div');
+                card.className = `card ${state.score < u.c ? 'locked' : ''}`;
+                card.id = `u-${u.id}`;
+                card.onclick = () => buy(i);
+                card.innerHTML = `
+                    <div class="u-lvl-badge">OWNED: ${u.lvl}</div>
+                    <div class="u-title">${u.n}</div>
+                    <div class="u-desc">${u.d}</div>
+                    <div class="u-benefit">${u.b}</div>
+                    <div class="u-cost">Cost: ${format(u.c)}</div>
+                `;
+                shop.appendChild(card);
             });
         };
 
@@ -205,128 +187,75 @@
             const u = state.upgrades[i];
             if (state.score >= u.c) {
                 state.score -= u.c; u.lvl++;
-                if (u.cps) state.cps += u.cps; 
-                if (u.cpc) state.cpc += u.cpc; 
-                if (u.cr) state.crit += u.cr;
-                u.c *= u.s; 
-                refresh();
-                save();
+                if (u.cps) state.cps += u.cps; if (u.cpc) state.cpc += u.cpc; if (u.cr) state.crit += u.cr;
+                u.c *= u.s; refresh(); save();
             }
         };
 
         const refresh = () => {
-            let m = 1 + (state.rebirths * 0.5);
-            
-            // Unique Mechanic: Resonance (1+ Rebirth)
-            if (state.rebirths >= 1) {
-                document.getElementById('resonance-bar').style.display = 'block';
-                const resonanceBonus = 1 + (state.resonance / 100);
-                m *= resonanceBonus;
-            }
-
-            // The Button Mechanic (5+ Rebirths)
-            const btn = document.getElementById('the-button');
-            if (state.rebirths >= 5) {
-                btn.style.display = 'flex';
-                if (overdriveActive) {
-                    m *= 5;
-                    btn.style.boxShadow = "0 0 50px white";
-                    btn.innerText = "ACTIVE!";
-                } else {
-                    btn.innerText = "THE BUTTON";
-                }
-            }
-
+            const m = 1 + (state.rebirths * 0.7); // Buffed rebirth mult to 0.7x
             document.getElementById('score-box').innerText = format(state.score);
             document.getElementById('st-cps').innerText = format(state.cps * m);
             document.getElementById('st-cpc').innerText = format(state.cpc * m);
             document.getElementById('st-crit').innerText = Math.round(state.crit * 100) + "%";
-            document.getElementById('rb-mult').innerText = `Mult: ${m.toFixed(1)}x (${state.rebirths} RB)`;
+            document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (Mult: ${m.toFixed(1)}x)`;
             document.getElementById('rb-cost-text').innerText = format(state.rebirthCost);
-            
-            const prog = Math.min((state.score / state.rebirthCost) * 100, 100);
-            document.getElementById('rb-progress').style.width = prog + "%";
+            document.getElementById('rebirth-btn').disabled = state.score < state.rebirthCost;
 
             state.upgrades.forEach(u => {
-                document.getElementById(`c-${u.id}`).innerText = format(u.c);
-                document.getElementById(`l-${u.id}`).innerText = u.lvl;
-                const card = document.getElementById(`u-${u.id}`);
-                state.score >= u.c ? card.classList.remove('locked') : card.classList.add('locked');
+                const el = document.getElementById(`u-${u.id}`);
+                if (el) {
+                    el.querySelector('.u-cost').innerText = `Cost: ${format(u.c)}`;
+                    el.querySelector('.u-lvl-badge').innerText = `OWNED: ${u.lvl}`;
+                    state.score >= u.c ? el.classList.remove('locked') : el.classList.add('locked');
+                }
             });
-
-            document.getElementById('rebirth-btn').disabled = state.score < state.rebirthCost;
         };
 
-        const save = () => localStorage.setItem(`trenton_save_${state.slot}`, JSON.stringify(state));
-
+        const save = () => localStorage.setItem(`save_slot_${state.slot}`, JSON.stringify(state));
+        
         const load = (slot) => {
-            const data = localStorage.getItem(`trenton_save_${slot}`);
-            if (data) {
-                state = JSON.parse(data);
+            const raw = localStorage.getItem(`save_slot_${slot}`);
+            if (raw) {
+                state = JSON.parse(raw);
+                state.slot = slot;
             } else {
-                state = {
-                    slot: slot, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05,
-                    rebirthCost: 100000, resonance: 0,
+                state = { 
+                    slot: slot, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000,
                     upgrades: baseUpgrades.map(u => ({...u, lvl: 0}))
                 };
             }
-            initShop();
+            document.querySelectorAll('.save-slot').forEach((s, i) => s.classList.toggle('active', i === slot));
+            renderShop();
             refresh();
-            
-            document.querySelectorAll('.save-slot').forEach((s, i) => {
-                s.classList.toggle('active', i === slot);
-            });
         };
 
         setInterval(() => { 
-            let m = 1 + (state.rebirths * 0.5);
-            if (state.rebirths >= 1) m *= (1 + (state.resonance / 100));
-            if (overdriveActive) {
-                m *= 5;
-                overdriveTimer--;
-                if (overdriveTimer <= 0) overdriveActive = false;
-            }
-            state.score += (state.cps * m) / 10; 
+            state.score += (state.cps * (1 + state.rebirths * 0.7)) / 10; 
             refresh(); 
         }, 100);
 
-        // Auto-save every 10 seconds
-        setInterval(save, 10000);
-
         return {
             click: () => { 
-                let m = 1 + (state.rebirths * 0.5);
-                if (state.rebirths >= 1) {
-                    m *= (1 + (state.resonance / 100));
-                    state.resonance = Math.min(state.resonance + 0.1, 100);
-                    document.getElementById('resonance-fill').style.width = state.resonance + "%";
-                }
-                if (overdriveActive) m *= 5;
-                state.score += state.cpc * m * (Math.random() < state.crit ? 5 : 1); 
+                state.score += state.cpc * (1 + state.rebirths * 0.7) * (Math.random() < state.crit ? 5 : 1); 
                 refresh(); 
             },
             rebirth: () => {
                 if (state.score >= state.rebirthCost) {
-                    state.rebirths++;
-                    state.rebirthCost *= 1.7;
-                    state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05; state.resonance = 0;
+                    state.rebirths++; state.rebirthCost *= 1.7;
+                    state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05;
                     state.upgrades.forEach(u => { u.lvl = 0; u.c = baseUpgrades.find(b => b.id === u.id).c; });
-                    initShop();
-                    refresh();
-                    save();
+                    renderShop(); refresh(); save();
                 }
             },
             switchSlot: (n) => { save(); load(n); },
-            activateOverdrive: () => {
-                if (!overdriveActive) {
-                    overdriveActive = true;
-                    overdriveTimer = 100; // 10 seconds at 100ms interval
-                }
+            toggleMusic: () => {
+                const bgm = document.getElementById('bgm');
+                bgm.paused ? bgm.play() : bgm.pause();
             }
         };
     })();
 
-    // Initial Load
     App.switchSlot(0);
 
     const snow = document.getElementById('snow');

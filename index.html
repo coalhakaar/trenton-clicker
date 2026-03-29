@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Auto-Save Expansion</title>
+<title>Trenton Ascended: Cyber-Audio Expansion</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -51,7 +51,7 @@
 
     /* TOP BUTTONS */
     #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); transition: 0.2s; }
-    #music-btn.playing { color: var(--success); border-color: var(--success); }
+    #music-btn.playing { color: var(--success); border-color: var(--success); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
     
     #wipe-btn { position: fixed; top: 20px; right: calc(var(--sidebar-w) + 20px); z-index: 100; background: #1a0505; border: 1px solid var(--crit); color: var(--crit); padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); font-weight: bold; transition: 0.2s; }
     #wipe-btn:hover { background: var(--crit); color: #000; }
@@ -167,12 +167,9 @@ const App = (() => {
         upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c}))
     };
 
-    let audioCtx=null, musicPlaying=false, stopFns=[];
+    let audioCtx=null, musicPlaying=false, stopFns=[], musicTimer=null;
 
-    // --- SAVE / LOAD LOGIC ---
-    const saveGame = () => {
-        localStorage.setItem('trentonAscendedSave', JSON.stringify(S));
-    };
+    const saveGame = () => localStorage.setItem('trentonAscendedSave', JSON.stringify(S));
 
     const loadGame = () => {
         const savedData = localStorage.getItem('trentonAscendedSave');
@@ -187,16 +184,12 @@ const App = (() => {
                 S.midasMult = parsed.midasMult || 1;
                 S.buyMult = parsed.buyMult || 1;
                 
-                // Smart merge: allows adding new upgrades to BASE_UPGRADES in future updates 
-                // without breaking the player's save file.
                 if(parsed.upgrades) {
                     S.upgrades = BASE_UPGRADES.map(base => {
                         const savedU = parsed.upgrades.find(u => u.id === base.id);
                         return savedU ? savedU : {id:base.id, lvl:0, c:base.c};
                     });
                 }
-                
-                // Restore button visual state
                 document.querySelectorAll('.mult-btn').forEach(b => {
                     b.classList.toggle('active', 
                         (b.innerText.includes('1X') && S.buyMult === 1) ||
@@ -204,7 +197,6 @@ const App = (() => {
                         (b.innerText.includes('MAX') && S.buyMult === 'MAX')
                     );
                 });
-
             } catch(e) { console.error("Save file corrupted, starting fresh."); }
         }
     };
@@ -292,7 +284,7 @@ const App = (() => {
             if(S.buyMult !== 'MAX' && j === count-1) break;
         }
         
-        if(boughtAny) saveGame(); // Trigger an immediate save on purchase
+        if(boughtAny) saveGame();
         refresh();
     };
 
@@ -316,13 +308,62 @@ const App = (() => {
             saveGame();
         },
         toggleMusic: () => {
-            if(musicPlaying) { stopFns.forEach(f=>f()); musicPlaying=false; document.getElementById('music-btn').innerText='♪ MUSIC OFF'; document.getElementById('music-btn').classList.remove('playing'); return; }
+            if(musicPlaying) { 
+                clearTimeout(musicTimer);
+                stopFns.forEach(f=>f()); musicPlaying=false; 
+                document.getElementById('music-btn').innerText='♪ MUSIC OFF'; 
+                document.getElementById('music-btn').classList.remove('playing'); 
+                return; 
+            }
+            
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const m = audioCtx.createGain(); m.gain.value=0.08; m.connect(audioCtx.destination);
-            const o1 = audioCtx.createOscillator(); o1.type='sine'; o1.frequency.value=110; o1.connect(m);
-            const o2 = audioCtx.createOscillator(); o2.type='sine'; o2.frequency.value=165; o2.connect(m);
-            o1.start(); o2.start();
-            stopFns = [()=>o1.stop(), ()=>o2.stop(), ()=>m.disconnect()];
+            const master = audioCtx.createGain(); master.gain.value = 0.2; master.connect(audioCtx.destination);
+            
+            // Cyberpunk Delay Echo
+            const delay = audioCtx.createDelay(); delay.delayTime.value = 0.3;
+            const feedback = audioCtx.createGain(); feedback.gain.value = 0.3;
+            delay.connect(feedback); feedback.connect(delay); delay.connect(master);
+
+            // Synthwave Minor Pentatonic Sequence
+            const notes = [55, 55, 65.41, 55, 73.42, 55, 82.41, 65.41];
+            let noteIdx = 0; let nextNoteTime = audioCtx.currentTime + 0.1;
+
+            const schedule = () => {
+                while(nextNoteTime < audioCtx.currentTime + 0.1) {
+                    const t = nextNoteTime;
+                    
+                    // Bass pulse
+                    const osc = audioCtx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = notes[noteIdx % notes.length];
+                    const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(100, t); filter.frequency.exponentialRampToValueAtTime(1500, t + 0.05); filter.frequency.exponentialRampToValueAtTime(100, t + 0.15);
+                    const env = audioCtx.createGain(); env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(0.5, t + 0.02); env.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                    
+                    osc.connect(filter); filter.connect(env); env.connect(master);
+                    osc.start(t); osc.stop(t + 0.15);
+
+                    // High Arp (polyrhythm effect)
+                    if (noteIdx % 3 === 0) {
+                        const arp = audioCtx.createOscillator(); arp.type = 'square'; arp.frequency.value = notes[(noteIdx+2) % notes.length] * 8;
+                        const arpEnv = audioCtx.createGain(); arpEnv.gain.setValueAtTime(0, t); arpEnv.gain.linearRampToValueAtTime(0.08, t + 0.02); arpEnv.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                        arp.connect(arpEnv); arpEnv.connect(delay); arpEnv.connect(master);
+                        arp.start(t); arp.stop(t + 0.1);
+                    }
+
+                    // Kick Drum
+                    if (noteIdx % 4 === 0) {
+                        const kick = audioCtx.createOscillator(); kick.type = 'sine';
+                        kick.frequency.setValueAtTime(150, t); kick.frequency.exponentialRampToValueAtTime(0.01, t + 0.3);
+                        const kEnv = audioCtx.createGain(); kEnv.gain.setValueAtTime(1, t); kEnv.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                        kick.connect(kEnv); kEnv.connect(master);
+                        kick.start(t); kick.stop(t + 0.3);
+                    }
+                    noteIdx++; nextNoteTime += 0.15;
+                }
+                if(musicPlaying) musicTimer = setTimeout(schedule, 25);
+            };
+            schedule();
+            
+            stopFns = [() => { if(audioCtx.state !== 'closed') audioCtx.close(); }];
             musicPlaying=true; document.getElementById('music-btn').innerText='♪ MUSIC ON'; document.getElementById('music-btn').classList.add('playing');
         },
         rebirth: () => {
@@ -334,21 +375,11 @@ const App = (() => {
                 renderShop();
             }
         },
-        wipeSave: () => {
-            localStorage.removeItem('trentonAscendedSave');
-            location.reload(); // Refresh the page to clear everything
-        },
+        wipeSave: () => { localStorage.removeItem('trentonAscendedSave'); location.reload(); },
         init: () => {
-            loadGame();
-            renderShop();
-            
-            // Core Game Loop (runs 10 times a second)
+            loadGame(); renderShop();
             setInterval(() => { S.score += getStats().eCps / 10; refresh(); }, 100);
-            
-            // Auto-Save Loop (runs every 10 seconds)
             setInterval(saveGame, 10000); 
-            
-            // Save if the user tries to close the tab
             window.addEventListener('beforeunload', saveGame);
         }
     };

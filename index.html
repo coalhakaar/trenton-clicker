@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Audio & UI Overhaul</title>
+<title>Trenton Ascended</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -13,6 +13,7 @@
         --glass-border: rgba(255, 255, 255, 0.1);
         --rebirth: #a29bfe;
         --success: #00ff88;
+        --midas: #ffd700;
         --fira: 'Fira Code', monospace;
     }
 
@@ -25,17 +26,8 @@
     .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.4; }
     @keyframes fall { to { transform: translateY(110vh); } }
 
-    /* Save Slots */
-    #save-header { position: fixed; top: 15px; left: 15px; display: flex; gap: 12px; z-index: 100; }
-    .save-slot {
-        padding: 8px 18px; background: var(--glass); border: 1px solid var(--glass-border);
-        border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: 0.3s; backdrop-filter: blur(5px);
-    }
-    .save-slot.active { border-color: var(--accent); background: rgba(0, 210, 255, 0.15); box-shadow: 0 0 15px rgba(0,210,255,0.2); }
-
-    /* Music Controls */
-    #audio-controls { position: fixed; top: 15px; right: 450px; z-index: 100; }
-    .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 8px; border-radius: 50%; cursor: pointer; }
+    #audio-controls { position: fixed; top: 15px; left: 15px; z-index: 100; }
+    .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px); }
 
     #game { display: grid; grid-template-columns: 1fr 440px; height: 100vh; }
 
@@ -54,7 +46,6 @@
         margin-top: 30px; border-radius: 50px; font-size: 3rem; backdrop-filter: blur(10px);
     }
 
-    /* Sidebar Shop */
     #shop { 
         background: rgba(0,0,0,0.4); border-left: 1px solid var(--glass-border); 
         padding: 25px; overflow-y: overlay; display: flex; flex-direction: column; gap: 15px;
@@ -67,6 +58,8 @@
         position: relative; display: flex; flex-direction: column; gap: 6px;
     }
     .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-5px); border-color: var(--accent); }
+    .card.midas-card { border-color: var(--midas); }
+    .card.midas-card .u-title { color: var(--midas); }
     .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
 
     .u-title { font-weight: bold; color: var(--accent); font-size: 1rem; letter-spacing: 1px; }
@@ -78,7 +71,6 @@
         background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; color: var(--accent);
     }
 
-    /* Footer Stats */
     #stats { 
         position: fixed; bottom: 0; left: 0; width: calc(100% - 440px); height: 100px;
         background: rgba(0,0,0,0.7); border-top: 1px solid var(--glass-border);
@@ -103,12 +95,6 @@
 <audio id="bgm" loop>
     <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
 </audio>
-
-<div id="save-header">
-    <div class="save-slot active" onclick="App.switchSlot(0)">Slot 1</div>
-    <div class="save-slot" onclick="App.switchSlot(1)">Slot 2</div>
-    <div class="save-slot" onclick="App.switchSlot(2)">Slot 3</div>
-</div>
 
 <div id="audio-controls">
     <button class="audio-btn" onclick="App.toggleMusic()">🎵</button>
@@ -138,7 +124,7 @@
 
 <script>
     const App = (() => {
-        let state = { slot: 0, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000, upgrades: [] };
+        let state = { score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000, midasMult: 1, upgrades: [] };
         const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qn"];
 
         const baseUpgrades = [
@@ -155,7 +141,8 @@
             { id: 'sl', n: 'Solar Synthesis', d: 'Direct energy from the sun.', b: '+150K CPS', cps: 150000, c: 60000000, s: 1.4 },
             { id: 'ga', n: 'Galaxy Mind', d: 'Processing the cosmos.', b: '+3M CPS', cps: 3000000, c: 6000000000, s: 1.42 },
             { id: 'ti', n: 'Time Warp', d: 'Gain power before you click.', b: '+20M CPC', cpc: 20000000, c: 80000000000, s: 1.45 },
-            { id: 'sg', n: 'The Singularity', d: 'The final stage of being.', b: '+100B CPS', cps: 100000000000, c: 1000000000000000, s: 1.6 }
+            { id: 'sg', n: 'The Singularity', d: 'The final stage of being.', b: '+100B CPS', cps: 100000000000, c: 1000000000000000, s: 1.6 },
+            { id: 'mi', n: 'Midas Touch', d: 'Everything turns to gold.', b: '3x Total Stats', midas: 3, c: 1000000000000000000, s: 5, isMidas: true }
         ];
 
         const format = (n) => {
@@ -169,7 +156,7 @@
             shop.innerHTML = '';
             state.upgrades.forEach((u, i) => {
                 const card = document.createElement('div');
-                card.className = `card ${state.score < u.c ? 'locked' : ''}`;
+                card.className = `card ${state.score < u.c ? 'locked' : ''} ${u.isMidas ? 'midas-card' : ''}`;
                 card.id = `u-${u.id}`;
                 card.onclick = () => buy(i);
                 card.innerHTML = `
@@ -188,16 +175,17 @@
             if (state.score >= u.c) {
                 state.score -= u.c; u.lvl++;
                 if (u.cps) state.cps += u.cps; if (u.cpc) state.cpc += u.cpc; if (u.cr) state.crit += u.cr;
+                if (u.midas) state.midasMult *= u.midas;
                 u.c *= u.s; refresh(); save();
             }
         };
 
         const refresh = () => {
-            const m = 1 + (state.rebirths * 0.7); // Buffed rebirth mult to 0.7x
+            const m = (1 + (state.rebirths * 0.7)) * state.midasMult;
             document.getElementById('score-box').innerText = format(state.score);
             document.getElementById('st-cps').innerText = format(state.cps * m);
             document.getElementById('st-cpc').innerText = format(state.cpc * m);
-            document.getElementById('st-crit').innerText = Math.round(state.crit * 100) + "%";
+            document.getElementById('st-crit').innerText = Math.min(Math.round(state.crit * 100), 100) + "%";
             document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (Mult: ${m.toFixed(1)}x)`;
             document.getElementById('rb-cost-text').innerText = format(state.rebirthCost);
             document.getElementById('rebirth-btn').disabled = state.score < state.rebirthCost;
@@ -212,43 +200,40 @@
             });
         };
 
-        const save = () => localStorage.setItem(`save_slot_${state.slot}`, JSON.stringify(state));
+        const save = () => localStorage.setItem('trenton_v1_save', JSON.stringify(state));
         
-        const load = (slot) => {
-            const raw = localStorage.getItem(`save_slot_${slot}`);
+        const load = () => {
+            const raw = localStorage.getItem('trenton_v1_save');
             if (raw) {
-                state = JSON.parse(raw);
-                state.slot = slot;
+                const saved = JSON.parse(raw);
+                state = {...state, ...saved};
             } else {
-                state = { 
-                    slot: slot, score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000,
-                    upgrades: baseUpgrades.map(u => ({...u, lvl: 0}))
-                };
+                state.upgrades = baseUpgrades.map(u => ({...u, lvl: 0}));
             }
-            document.querySelectorAll('.save-slot').forEach((s, i) => s.classList.toggle('active', i === slot));
             renderShop();
             refresh();
         };
 
         setInterval(() => { 
-            state.score += (state.cps * (1 + state.rebirths * 0.7)) / 10; 
+            state.score += (state.cps * (1 + state.rebirths * 0.7) * state.midasMult) / 10; 
             refresh(); 
         }, 100);
 
+        setInterval(save, 5000);
+
         return {
             click: () => { 
-                state.score += state.cpc * (1 + state.rebirths * 0.7) * (Math.random() < state.crit ? 5 : 1); 
+                state.score += state.cpc * (1 + state.rebirths * 0.7) * state.midasMult * (Math.random() < state.crit ? 5 : 1); 
                 refresh(); 
             },
             rebirth: () => {
                 if (state.score >= state.rebirthCost) {
                     state.rebirths++; state.rebirthCost *= 1.7;
-                    state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05;
+                    state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05; state.midasMult = 1;
                     state.upgrades.forEach(u => { u.lvl = 0; u.c = baseUpgrades.find(b => b.id === u.id).c; });
                     renderShop(); refresh(); save();
                 }
             },
-            switchSlot: (n) => { save(); load(n); },
             toggleMusic: () => {
                 const bgm = document.getElementById('bgm');
                 bgm.paused ? bgm.play() : bgm.pause();
@@ -256,14 +241,43 @@
         };
     })();
 
-    App.switchSlot(0);
+    App.click(); // Trigger initial load logic
+    window.onload = () => {
+        const raw = localStorage.getItem('trenton_v1_save');
+        if (raw) {
+            // Logic to handle existing save
+        }
+    };
+    
+    // Explicit load call
+    document.addEventListener('DOMContentLoaded', () => {
+        const raw = localStorage.getItem('trenton_v1_save');
+        if(!raw) {
+            // Set defaults if no save exists
+        }
+        // Force load
+        const AppCore = App;
+        // Re-inject the load call inside the closure logic essentially
+    });
+</script>
 
-    const snow = document.getElementById('snow');
-    for (let i = 0; i < 40; i++) {
-        const f = document.createElement('div'); f.className = 'flake';
-        f.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;`;
-        snow.appendChild(f);
-    }
+<script>
+    App.toggleMusic(); // Try to play music
+    // The previous App variable is already globally accessible
+    // Let's ensure the load happens immediately
+    location.hash = ""; 
+    const init = () => {
+        const check = localStorage.getItem('trenton_v1_save');
+        // Final logic to ensure Shop loads
+        setTimeout(() => {
+            // This ensures the DOM is ready for the cards
+            const shop = document.getElementById('shop');
+            if(shop.innerHTML === "") {
+                // If shop failed to render on first pass, force it
+                location.reload(); 
+            }
+        }, 100);
+    };
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended</title>
+<title>Trenton Ascended: Midas Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -23,70 +23,70 @@
     }
 
     #snow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.4; }
+    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.3; }
     @keyframes fall { to { transform: translateY(110vh); } }
 
-    #audio-controls { position: fixed; top: 15px; left: 15px; z-index: 100; }
-    .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 10px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px); }
+    #audio-controls { position: fixed; top: 20px; left: 20px; z-index: 100; }
+    .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(10px); }
 
     #game { display: grid; grid-template-columns: 1fr 440px; height: 100vh; }
 
-    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
-    h1 { font-size: 2rem; color: var(--accent); letter-spacing: 5px; margin-bottom: 25px; filter: drop-shadow(0 0 8px var(--accent)); }
+    #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 80px; }
+    h1 { font-size: 2.2rem; color: var(--accent); letter-spacing: 6px; margin-bottom: 30px; filter: drop-shadow(0 0 10px var(--accent)); }
     
     #trenton {
-        width: 240px; height: 240px; border-radius: 50%; object-fit: cover;
+        width: 250px; height: 250px; border-radius: 50%; object-fit: cover;
         border: 3px solid var(--accent); cursor: pointer; transition: 0.05s;
-        box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); user-select: none;
+        box-shadow: 0 0 50px rgba(0, 210, 255, 0.2); user-select: none;
     }
-    #trenton:active { transform: scale(0.95); filter: brightness(1.3); }
+    #trenton:active { transform: scale(0.94); filter: brightness(1.4); }
 
     #score-box { 
-        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 50px;
-        margin-top: 30px; border-radius: 50px; font-size: 3rem; backdrop-filter: blur(10px);
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 60px;
+        margin-top: 35px; border-radius: 60px; font-size: 3.2rem; backdrop-filter: blur(15px);
     }
 
     #shop { 
-        background: rgba(0,0,0,0.4); border-left: 1px solid var(--glass-border); 
-        padding: 25px; overflow-y: overlay; display: flex; flex-direction: column; gap: 15px;
-        backdrop-filter: blur(20px);
+        background: rgba(0,0,0,0.5); border-left: 1px solid var(--glass-border); 
+        padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+        backdrop-filter: blur(25px);
     }
 
     .card {
         background: var(--glass); border: 1px solid var(--glass-border);
-        padding: 18px; border-radius: 12px; cursor: pointer; transition: 0.3s;
-        position: relative; display: flex; flex-direction: column; gap: 6px;
+        padding: 20px; border-radius: 14px; cursor: pointer; transition: 0.3s;
+        position: relative; display: flex; flex-direction: column; gap: 8px;
     }
-    .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-5px); border-color: var(--accent); }
-    .card.midas-card { border-color: var(--midas); }
-    .card.midas-card .u-title { color: var(--midas); }
-    .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
+    .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-8px); border-color: var(--accent); }
+    .card.is-midas { border-color: var(--midas); box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.1); }
+    .card.is-midas .u-title { color: var(--midas); text-shadow: 0 0 5px var(--midas); }
+    .card.locked { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
 
-    .u-title { font-weight: bold; color: var(--accent); font-size: 1rem; letter-spacing: 1px; }
-    .u-desc { font-size: 0.75rem; color: #a0a0a0; line-height: 1.4; }
-    .u-benefit { font-size: 0.8rem; color: var(--success); font-weight: bold; }
-    .u-cost { color: #fff; font-size: 0.9rem; margin-top: 5px; opacity: 0.9; }
+    .u-title { font-weight: bold; color: var(--accent); font-size: 1.1rem; letter-spacing: 1px; }
+    .u-desc { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
+    .u-benefit { font-size: 0.85rem; color: var(--success); font-weight: bold; }
+    .u-cost { color: #fff; font-size: 1rem; margin-top: 5px; font-weight: bold; }
     .u-lvl-badge {
-        position: absolute; top: 12px; right: 12px; font-size: 0.7rem;
-        background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; color: var(--accent);
+        position: absolute; top: 15px; right: 15px; font-size: 0.75rem;
+        background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 6px; color: var(--accent);
     }
 
     #stats { 
-        position: fixed; bottom: 0; left: 0; width: calc(100% - 440px); height: 100px;
-        background: rgba(0,0,0,0.7); border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center;
+        position: fixed; bottom: 0; left: 0; width: calc(100% - 440px); height: 110px;
+        background: rgba(0,0,0,0.8); border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px);
     }
-    .stat label { font-size: 0.7rem; color: #8b949e; display: block; text-transform: uppercase; }
-    .stat span { color: var(--accent); font-weight: bold; font-size: 1.5rem; }
+    .stat label { font-size: 0.75rem; color: #8b949e; display: block; text-transform: uppercase; letter-spacing: 1px; }
+    .stat span { color: var(--accent); font-weight: bold; font-size: 1.7rem; }
 
     #rebirth-btn {
-        width: 100%; padding: 14px; background: var(--rebirth); border: none; border-radius: 8px;
+        width: 100%; padding: 16px; background: var(--rebirth); border: none; border-radius: 10px;
         color: white; font-family: var(--fira); font-weight: bold; cursor: pointer;
-        margin-top: 20px; transition: 0.3s;
+        margin-top: 25px; transition: 0.3s; font-size: 1rem;
     }
-    #rebirth-btn:disabled { background: #222; opacity: 0.4; }
+    #rebirth-btn:disabled { background: #1a1a1a; opacity: 0.4; }
 
-    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
@@ -108,9 +108,9 @@
         <img id="trenton" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="App.click()">
         <div id="score-box">0</div>
         
-        <div style="width: 280px;">
+        <div style="width: 300px;">
             <button id="rebirth-btn" onclick="App.rebirth()" disabled>REBIRTH: <span id="rb-cost-text">100K</span></button>
-            <div style="text-align: center; font-size: 0.7rem; margin-top: 10px; color: var(--rebirth)" id="rb-status">0 Rebirths</div>
+            <div style="text-align: center; font-size: 0.8rem; margin-top: 12px; color: var(--rebirth)" id="rb-status">0 Rebirths</div>
         </div>
     </div>
     <div id="shop"></div>
@@ -124,12 +124,11 @@
 
 <script>
     const App = (() => {
-        let state = { score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, rebirthCost: 100000, midasMult: 1, upgrades: [] };
-        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qn"];
-
+        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+        
         const baseUpgrades = [
-            { id: 'm', n: 'Mass Gain', d: 'Trenton bulks up his physical form.', b: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.15 },
-            { id: 's', n: 'Strength Training', d: 'Intense lifting sessions.', b: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.2 },
+            { id: 'm', n: 'Mass Gain', d: 'Trenton bulks up his physical form.', b: '+1 CPS', cps: 1, c: 10, s: 1.15 },
+            { id: 's', n: 'Strength Training', d: 'Intense lifting sessions.', b: '+3 CPC', cpc: 3, c: 50, s: 1.2 },
             { id: 'sh', n: 'Bio-Power', d: 'Optimized metabolic output.', b: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.25 },
             { id: 'n', n: 'Neural Pulse', d: 'Brain overclocking protocols.', b: '+45 CPS', cps: 45, c: 1500, s: 1.28 },
             { id: 'cr', n: 'Focus Aura', d: 'Sharper mental concentration.', b: '+3% Crit', cr: 0.03, c: 5000, s: 1.35 },
@@ -142,8 +141,14 @@
             { id: 'ga', n: 'Galaxy Mind', d: 'Processing the cosmos.', b: '+3M CPS', cps: 3000000, c: 6000000000, s: 1.42 },
             { id: 'ti', n: 'Time Warp', d: 'Gain power before you click.', b: '+20M CPC', cpc: 20000000, c: 80000000000, s: 1.45 },
             { id: 'sg', n: 'The Singularity', d: 'The final stage of being.', b: '+100B CPS', cps: 100000000000, c: 1000000000000000, s: 1.6 },
-            { id: 'mi', n: 'Midas Touch', d: 'Everything turns to gold.', b: '3x Total Stats', midas: 3, c: 1000000000000000000, s: 5, isMidas: true }
+            { id: 'mi', n: 'Midas Touch', d: 'Everything turns to gold.', b: '3x Total Power', midas: 3, c: 1000000000000000000, s: 5, isMidas: true }
         ];
+
+        let state = {
+            score: 0, cps: 0, cpc: 1, rebirths: 0, crit: 0.05, 
+            rebirthCost: 100000, midasMult: 1,
+            upgrades: baseUpgrades.map(u => ({...u, lvl: 0}))
+        };
 
         const format = (n) => {
             if (n < 1000) return Math.floor(n);
@@ -151,12 +156,33 @@
             return (n / Math.pow(10, e * 3)).toFixed(2) + (suffixes[e] || "??");
         };
 
+        const save = () => localStorage.setItem('trenton_v2_single_save', JSON.stringify(state));
+
+        const load = () => {
+            const raw = localStorage.getItem('trenton_v2_single_save');
+            if (raw) {
+                const saved = JSON.parse(raw);
+                // Merge saved levels and costs back into current upgrade definitions
+                saved.upgrades.forEach(su => {
+                    const u = state.upgrades.find(item => item.id === su.id);
+                    if(u) { u.lvl = su.lvl; u.c = su.c; }
+                });
+                state.score = saved.score;
+                state.cps = saved.cps;
+                state.cpc = saved.cpc;
+                state.rebirths = saved.rebirths;
+                state.crit = saved.crit;
+                state.rebirthCost = saved.rebirthCost;
+                state.midasMult = saved.midasMult || 1;
+            }
+        };
+
         const renderShop = () => {
             const shop = document.getElementById('shop');
             shop.innerHTML = '';
             state.upgrades.forEach((u, i) => {
                 const card = document.createElement('div');
-                card.className = `card ${state.score < u.c ? 'locked' : ''} ${u.isMidas ? 'midas-card' : ''}`;
+                card.className = `card ${u.isMidas ? 'is-midas' : ''}`;
                 card.id = `u-${u.id}`;
                 card.onclick = () => buy(i);
                 card.innerHTML = `
@@ -173,20 +199,25 @@
         const buy = (i) => {
             const u = state.upgrades[i];
             if (state.score >= u.c) {
-                state.score -= u.c; u.lvl++;
-                if (u.cps) state.cps += u.cps; if (u.cpc) state.cpc += u.cpc; if (u.cr) state.crit += u.cr;
+                state.score -= u.c;
+                u.lvl++;
+                if (u.cps) state.cps += u.cps;
+                if (u.cpc) state.cpc += u.cpc;
+                if (u.cr) state.crit += u.cr;
                 if (u.midas) state.midasMult *= u.midas;
-                u.c *= u.s; refresh(); save();
+                u.c *= u.s;
+                refresh();
+                save();
             }
         };
 
         const refresh = () => {
-            const m = (1 + (state.rebirths * 0.7)) * state.midasMult;
+            const mult = (1 + (state.rebirths * 0.7)) * state.midasMult;
             document.getElementById('score-box').innerText = format(state.score);
-            document.getElementById('st-cps').innerText = format(state.cps * m);
-            document.getElementById('st-cpc').innerText = format(state.cpc * m);
+            document.getElementById('st-cps').innerText = format(state.cps * mult);
+            document.getElementById('st-cpc').innerText = format(state.cpc * mult);
             document.getElementById('st-crit').innerText = Math.min(Math.round(state.crit * 100), 100) + "%";
-            document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (Mult: ${m.toFixed(1)}x)`;
+            document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (Mult: ${mult.toFixed(1)}x)`;
             document.getElementById('rb-cost-text').innerText = format(state.rebirthCost);
             document.getElementById('rebirth-btn').disabled = state.score < state.rebirthCost;
 
@@ -200,84 +231,53 @@
             });
         };
 
-        const save = () => localStorage.setItem('trenton_v1_save', JSON.stringify(state));
+        // Initialize Everything
+        load();
         
-        const load = () => {
-            const raw = localStorage.getItem('trenton_v1_save');
-            if (raw) {
-                const saved = JSON.parse(raw);
-                state = {...state, ...saved};
-            } else {
-                state.upgrades = baseUpgrades.map(u => ({...u, lvl: 0}));
-            }
-            renderShop();
+        setInterval(() => {
+            const mult = (1 + (state.rebirths * 0.7)) * state.midasMult;
+            state.score += (state.cps * mult) / 10;
             refresh();
-        };
-
-        setInterval(() => { 
-            state.score += (state.cps * (1 + state.rebirths * 0.7) * state.midasMult) / 10; 
-            refresh(); 
         }, 100);
 
         setInterval(save, 5000);
 
         return {
-            click: () => { 
-                state.score += state.cpc * (1 + state.rebirths * 0.7) * state.midasMult * (Math.random() < state.crit ? 5 : 1); 
-                refresh(); 
+            click: () => {
+                const mult = (1 + (state.rebirths * 0.7)) * state.midasMult;
+                state.score += state.cpc * mult * (Math.random() < state.crit ? 5 : 1);
+                refresh();
             },
             rebirth: () => {
                 if (state.score >= state.rebirthCost) {
-                    state.rebirths++; state.rebirthCost *= 1.7;
+                    state.rebirths++;
+                    state.rebirthCost *= 1.7;
                     state.score = 0; state.cps = 0; state.cpc = 1; state.crit = 0.05; state.midasMult = 1;
-                    state.upgrades.forEach(u => { u.lvl = 0; u.c = baseUpgrades.find(b => b.id === u.id).c; });
+                    state.upgrades.forEach(u => {
+                        u.lvl = 0;
+                        u.c = baseUpgrades.find(b => b.id === u.id).c;
+                    });
                     renderShop(); refresh(); save();
                 }
             },
             toggleMusic: () => {
                 const bgm = document.getElementById('bgm');
                 bgm.paused ? bgm.play() : bgm.pause();
-            }
+            },
+            init: () => { renderShop(); refresh(); }
         };
     })();
 
-    App.click(); // Trigger initial load logic
-    window.onload = () => {
-        const raw = localStorage.getItem('trenton_v1_save');
-        if (raw) {
-            // Logic to handle existing save
-        }
-    };
+    // Run UI build
+    window.onload = () => App.init();
     
-    // Explicit load call
-    document.addEventListener('DOMContentLoaded', () => {
-        const raw = localStorage.getItem('trenton_v1_save');
-        if(!raw) {
-            // Set defaults if no save exists
-        }
-        // Force load
-        const AppCore = App;
-        // Re-inject the load call inside the closure logic essentially
-    });
-</script>
-
-<script>
-    App.toggleMusic(); // Try to play music
-    // The previous App variable is already globally accessible
-    // Let's ensure the load happens immediately
-    location.hash = ""; 
-    const init = () => {
-        const check = localStorage.getItem('trenton_v1_save');
-        // Final logic to ensure Shop loads
-        setTimeout(() => {
-            // This ensures the DOM is ready for the cards
-            const shop = document.getElementById('shop');
-            if(shop.innerHTML === "") {
-                // If shop failed to render on first pass, force it
-                location.reload(); 
-            }
-        }, 100);
-    };
+    // Snow Effect
+    const snow = document.getElementById('snow');
+    for (let i = 0; i < 40; i++) {
+        const f = document.createElement('div'); f.className = 'flake';
+        f.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;`;
+        snow.appendChild(f);
+    }
 </script>
 </body>
 </html>

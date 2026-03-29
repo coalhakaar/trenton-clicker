@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Expansion</title>
+<title>Trenton Ascended: Auto-Save Expansion</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -21,7 +21,6 @@
 
     /* LEFT PANEL */
     #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 100px; }
-    
     h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 30px rgba(0,210,255,0.5); text-transform: uppercase; }
 
     #trenton-container { position: relative; cursor: pointer; user-select: none; }
@@ -38,9 +37,10 @@
         border: 2px solid var(--accent); animation: ripple-out 0.6s ease-out forwards;
         transform: translate(-50%, -50%); z-index: 50;
     }
+    .ripple.is-crit { border-color: var(--crit); border-width: 4px; box-shadow: 0 0 20px var(--crit); }
     @keyframes ripple-out {
         0% { width: 0; height: 0; opacity: 1; }
-        100% { width: 150px; height: 150px; opacity: 0; }
+        100% { width: 160px; height: 160px; opacity: 0; }
     }
 
     #score-box {
@@ -49,39 +49,33 @@
         backdrop-filter: blur(10px); text-align: center; color: #fff;
     }
 
-    /* MUSIC BUTTON */
-    #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); }
+    /* TOP BUTTONS */
+    #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); transition: 0.2s; }
     #music-btn.playing { color: var(--success); border-color: var(--success); }
+    
+    #wipe-btn { position: fixed; top: 20px; right: calc(var(--sidebar-w) + 20px); z-index: 100; background: #1a0505; border: 1px solid var(--crit); color: var(--crit); padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); font-weight: bold; transition: 0.2s; }
+    #wipe-btn:hover { background: var(--crit); color: #000; }
 
-    /* SIDEBAR & TABS */
+    /* SIDEBAR */
     #shop-container { background: #05070a; border-left: 1px solid var(--glass-border); display: flex; flex-direction: column; overflow: hidden; }
     #sidebar-header { background: #000; border-bottom: 1px solid var(--glass-border); }
     .tabs { display: flex; }
-    .tab-btn {
-        flex: 1; padding: 20px; border: none; background: transparent; color: #444;
-        cursor: pointer; font-family: var(--fira); font-weight: 700; font-size: 0.8rem;
-    }
+    .tab-btn { flex: 1; padding: 20px; border: none; background: transparent; color: #444; cursor: pointer; font-family: var(--fira); font-weight: 700; font-size: 0.8rem; }
     .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: rgba(255,255,255,0.02); }
 
     #buy-mult-strip { display: flex; background: #000; padding: 10px; gap: 8px; }
-    .mult-btn {
-        flex: 1; padding: 8px; font-size: 0.7rem; background: #111; border: 1px solid #222;
-        color: #555; cursor: pointer; border-radius: 4px; font-family: var(--fira);
-    }
+    .mult-btn { flex: 1; padding: 8px; font-size: 0.7rem; background: #111; border: 1px solid #222; color: #555; cursor: pointer; border-radius: 4px; font-family: var(--fira); transition: 0.2s; }
     .mult-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
 
     #shop-list { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 
-    /* UPGRADE CARDS */
-    .card {
-        width: 100%; min-height: 180px; border-radius: 12px; cursor: pointer; transition: 0.2s;
-        position: relative; background: #0f1419; border: 1px solid #21262d;
-        display: flex; flex-direction: column; overflow: visible;
-    }
+    /* CARDS */
+    .card { width: 100%; min-height: 180px; border-radius: 12px; cursor: pointer; transition: 0.2s; position: relative; background: #0f1419; border: 1px solid #21262d; display: flex; flex-direction: column; }
     .card:hover:not(.locked) { border-color: var(--accent); background: #161b22; transform: translateX(6px); }
     .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
     .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); border-radius: 12px 0 0 12px; }
     .card.is-midas::before { background: var(--midas); }
+    .card.is-crit-up::before { background: var(--crit); }
 
     .card-inner { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
@@ -96,12 +90,8 @@
     .d-val.total { color: var(--accent); }
     .d-val.price { color: var(--midas); font-size: 1.1rem; }
 
-    /* FOOTER STATS */
-    #stats {
-        position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 90px;
-        background: #000; border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center;
-    }
+    /* FOOTER */
+    #stats { position: fixed; bottom: 0; left: 0; width: calc(100% - var(--sidebar-w)); height: 90px; background: #000; border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; }
     .stat label { font-size: 0.65rem; color: #555; display: block; letter-spacing: 2px; }
     .stat span { font-size: 1.2rem; font-weight: 700; color: #fff; }
 </style>
@@ -110,6 +100,8 @@
 
 <div id="game">
     <button id="music-btn" onclick="App.toggleMusic()">♪ MUSIC OFF</button>
+    <button id="wipe-btn" onclick="if(confirm('Are you sure you want to WIPE your save? This cannot be undone.')) App.wipeSave()">WIPE SAVE</button>
+    
     <div id="main">
         <h1>TRENTON ASCENDED</h1>
         <div id="trenton-container" onclick="App.click(event)">
@@ -121,10 +113,7 @@
 
     <div id="shop-container">
         <div id="sidebar-header">
-            <div class="tabs">
-                <button class="tab-btn active">UPGRADES</button>
-                <button class="tab-btn">PERKS</button>
-            </div>
+            <div class="tabs"><button class="tab-btn active">UPGRADES</button><button class="tab-btn">PERKS</button></div>
             <div id="buy-mult-strip">
                 <button class="mult-btn active" onclick="App.setMult(1)">BUY 1X</button>
                 <button class="mult-btn" onclick="App.setMult(10)">BUY 10X</button>
@@ -138,6 +127,7 @@
 <div id="stats">
     <div class="stat"><label>CPS</label><span id="st-cps">0</span></div>
     <div class="stat"><label>CPC</label><span id="st-cpc">1</span></div>
+    <div class="stat"><label>CRIT</label><span id="st-crit">5%</span></div>
     <div class="stat"><label>MULTI</label><span id="st-mult">×1.0</span></div>
 </div>
 
@@ -153,35 +143,76 @@ const App = (() => {
     const BASE_UPGRADES = [
         { id:'u1',  n:'Muscle Fiber',      type:'CPC', p:2,       c:15,      s:1.15 },
         { id:'u2',  n:'Auto-Clicker',      type:'CPS', p:1,       c:100,     s:1.16 },
-        { id:'u3',  n:'Protein Synth',     type:'CPC', p:10,      c:500,     s:1.18 },
-        { id:'u4',  n:'Neural Link',       type:'CPS', p:8,       c:2500,    s:1.20 },
-        { id:'u5',  n:'Kinetic Battery',   type:'CPC', p:50,      c:12000,   s:1.22 },
-        { id:'u6',  n:'Stellar Nursery',   type:'CPS', p:45,      c:60000,   s:1.24 },
-        { id:'u7',  n:'Fusion Core',       type:'CPS', p:200,     c:3.5e5,   s:1.26 },
-        { id:'u8',  n:'Gravity Forge',     type:'CPC', p:1200,    c:1.2e6,   s:1.28 },
-        { id:'u9',  n:'Dyson Swarm',       type:'CPS', p:8500,    c:1e7,     s:1.30 },
-        { id:'u10', n:'Wormhole Tech',     type:'CPC', p:40000,   c:1.5e8,   s:1.32 },
-        { id:'u11', n:'Galactic Filament', type:'CPS', p:1.2e5,   c:2e9,     s:1.35 },
-        { id:'u12', n:'Event Horizon',     type:'CPC', p:1e6,     c:5e10,    s:1.38 },
-        { id:'u13', n:'Dark Matter',       type:'CPS', p:1.5e7,   c:8e11,    s:1.40 },
-        { id:'u14', n:'Void Engine',       type:'CPC', p:2.5e8,   c:1e13,    s:1.42 },
-        { id:'u15', n:'Time Dilation',     type:'MULT',p:1.5,     c:1e15,    s:5, isMidas:true },
-        { id:'u16', n:'Omega Point',       type:'CPS', p:1e12,    c:1e18,    s:1.45 },
-        { id:'u17', n:'Reality Anchor',    type:'CPC', p:5e14,    c:1e21,    s:1.50 },
-        { id:'u18', n:'Midas Touch',       type:'MULT',p:3,       c:1e25,    s:10, isMidas:true }
+        { id:'u3',  n:'Precision Blows',   type:'CRIT',p:0.01,    c:400,     s:1.50, isCrit:true },
+        { id:'u4',  n:'Protein Synth',     type:'CPC', p:10,      c:800,     s:1.18 },
+        { id:'u5',  n:'Neural Link',       type:'CPS', p:12,      c:3000,    s:1.20 },
+        { id:'u6',  n:'Hybrid Vigor',      type:'BOTH',p:25,      c:15000,   s:1.25 },
+        { id:'u7',  n:'Stellar Nursery',   type:'CPS', p:80,      c:75000,   s:1.24 },
+        { id:'u8',  n:'Gravity Forge',     type:'CPC', p:1500,    c:1.5e6,   s:1.28 },
+        { id:'u9',  n:'Dyson Swarm',       type:'CPS', p:10000,   c:1.2e7,   s:1.30 },
+        { id:'u10', n:'Supernova Core',    type:'BOTH',p:6500,    c:2.5e8,   s:1.35 },
+        { id:'u11', n:'Deadly Intent',     type:'CRIT',p:0.02,    c:8e8,     s:2.0, isCrit:true },
+        { id:'u12', n:'Event Horizon',     type:'CPC', p:1.5e6,   c:6e10,    s:1.38 },
+        { id:'u13', n:'Dark Matter',       type:'CPS', p:2.2e7,   c:1e12,    s:1.40 },
+        { id:'u14', n:'Void Engine',       type:'CPC', p:3e8,     c:1.5e13,  s:1.42 },
+        { id:'u15', n:'Reality Split',     type:'BOTH',p:1e8,     c:2e14,    s:1.45 },
+        { id:'u16', n:'Time Dilation',     type:'MULT',p:1.5,     c:1e16,    s:6, isMidas:true },
+        { id:'u17', n:'Omega Point',       type:'CPS', p:2e12,    c:1e19,    s:1.45 },
+        { id:'u18', n:'Reality Anchor',    type:'CPC', p:8e14,    c:1e22,    s:1.50 },
+        { id:'u19', n:'Midas Touch',       type:'MULT',p:4,       c:1e26,    s:12, isMidas:true }
     ];
 
     let S = {
-        score:0, cps:0, cpc:1, rebirths:0, midasMult:1, buyMult:1,
+        score:0, cps:0, cpc:1, crit:0.05, rebirths:0, midasMult:1, buyMult:1,
         upgrades: BASE_UPGRADES.map(u => ({id:u.id, lvl:0, c:u.c}))
     };
 
     let audioCtx=null, musicPlaying=false, stopFns=[];
 
+    // --- SAVE / LOAD LOGIC ---
+    const saveGame = () => {
+        localStorage.setItem('trentonAscendedSave', JSON.stringify(S));
+    };
+
+    const loadGame = () => {
+        const savedData = localStorage.getItem('trentonAscendedSave');
+        if(savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                S.score = parsed.score || 0;
+                S.cps = parsed.cps || 0;
+                S.cpc = parsed.cpc || 1;
+                S.crit = parsed.crit || 0.05;
+                S.rebirths = parsed.rebirths || 0;
+                S.midasMult = parsed.midasMult || 1;
+                S.buyMult = parsed.buyMult || 1;
+                
+                // Smart merge: allows adding new upgrades to BASE_UPGRADES in future updates 
+                // without breaking the player's save file.
+                if(parsed.upgrades) {
+                    S.upgrades = BASE_UPGRADES.map(base => {
+                        const savedU = parsed.upgrades.find(u => u.id === base.id);
+                        return savedU ? savedU : {id:base.id, lvl:0, c:base.c};
+                    });
+                }
+                
+                // Restore button visual state
+                document.querySelectorAll('.mult-btn').forEach(b => {
+                    b.classList.toggle('active', 
+                        (b.innerText.includes('1X') && S.buyMult === 1) ||
+                        (b.innerText.includes('10X') && S.buyMult === 10) ||
+                        (b.innerText.includes('MAX') && S.buyMult === 'MAX')
+                    );
+                });
+
+            } catch(e) { console.error("Save file corrupted, starting fresh."); }
+        }
+    };
+
     const getStats = () => {
         const rbMult = 1 + (S.rebirths * 1.0);
         const gMult = rbMult * S.midasMult;
-        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, gMult };
+        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, gMult, crit: Math.min(S.crit, 0.65) };
     };
 
     const refresh = () => {
@@ -189,16 +220,26 @@ const App = (() => {
         document.getElementById('score-box').innerText = fmt(S.score);
         document.getElementById('st-cps').innerText = fmt(st.eCps);
         document.getElementById('st-cpc').innerText = fmt(st.eCpc);
+        document.getElementById('st-crit').innerText = Math.round(st.crit * 100) + '%';
         document.getElementById('st-mult').innerText = '×' + st.gMult.toFixed(1);
 
         S.upgrades.forEach((u, i) => {
             const el = document.getElementById('card-' + u.id);
             if (!el) return;
             const def = BASE_UPGRADES[i];
-            el.classList.toggle('locked', S.score < u.c);
-            el.querySelector('.cell-price').innerText = fmt(u.c);
+            
+            const isAtCap = def.type === 'CRIT' && S.crit >= 0.65;
+            el.classList.toggle('locked', S.score < u.c || isAtCap);
+            
+            el.querySelector('.cell-price').innerText = isAtCap ? "MAXED" : fmt(u.c);
             el.querySelector('.card-lvl').innerText = 'LVL ' + u.lvl;
-            el.querySelector('.cell-total').innerText = (def.type==='MULT'?'×':'+') + fmt(def.p * u.lvl);
+            
+            let impactStr = "";
+            if(def.type === 'CRIT') impactStr = "+" + Math.round(def.p * u.lvl * 100) + "%";
+            else if(def.type === 'MULT') impactStr = "×" + fmt(Math.pow(def.p, u.lvl));
+            else impactStr = "+" + fmt(def.p * u.lvl);
+            
+            el.querySelector('.cell-total').innerText = impactStr;
         });
 
         const rbG = S.score >= 1e7 ? Math.floor(Math.pow(S.score/1e6, 0.4)) : 0;
@@ -210,15 +251,18 @@ const App = (() => {
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
         BASE_UPGRADES.forEach((def, i) => {
-            const u = S.upgrades[i];
             const card = document.createElement('div');
-            card.className = `card ${def.isMidas ? 'is-midas' : ''}`;
+            card.className = `card ${def.isMidas ? 'is-midas' : ''} ${def.isCrit ? 'is-crit-up' : ''}`;
             card.id = 'card-' + def.id;
+            
+            const typeLabel = def.type === 'BOTH' ? 'CPC & CPS' : def.type;
+            const valLabel = def.type === 'CRIT' ? (def.p*100)+"%" : fmt(def.p);
+
             card.innerHTML = `
                 <div class="card-inner">
                     <div class="card-top"><span class="card-name">${def.n}</span><span class="card-lvl">LVL 0</span></div>
                     <div class="stat-stack">
-                        <div class="data-line"><span class="d-label">Per Level</span><span class="d-val boost">+${fmt(def.p)} ${def.type}</span></div>
+                        <div class="data-line"><span class="d-label">Per Level</span><span class="d-val boost">+${valLabel} ${typeLabel}</span></div>
                         <div class="data-line"><span class="d-label">Total Impact</span><span class="d-val total cell-total">0</span></div>
                     </div>
                     <div class="data-line" style="margin-top:auto"><span class="d-label">Price</span><span class="d-val price cell-price">0</span></div>
@@ -232,23 +276,36 @@ const App = (() => {
     const buyU = i => {
         const def = BASE_UPGRADES[i], u = S.upgrades[i];
         let count = S.buyMult === 'MAX' ? 1000 : S.buyMult;
+        let boughtAny = false;
+        
         for(let j=0; j<count; j++){
             if (S.score < u.c) break;
+            if (def.type === 'CRIT' && S.crit >= 0.65) break;
+
             S.score -= u.c; u.lvl++;
-            if(def.type==='CPS') S.cps += def.p;
-            if(def.type==='CPC') S.cpc += def.p;
-            if(def.type==='MULT') S.midasMult *= def.p;
+            if(def.type === 'CPS' || def.type === 'BOTH') S.cps += def.p;
+            if(def.type === 'CPC' || def.type === 'BOTH') S.cpc += def.p;
+            if(def.type === 'CRIT') S.crit += def.p;
+            if(def.type === 'MULT') S.midasMult *= def.p;
             u.c *= def.s;
+            boughtAny = true;
             if(S.buyMult !== 'MAX' && j === count-1) break;
         }
+        
+        if(boughtAny) saveGame(); // Trigger an immediate save on purchase
         refresh();
     };
 
     return {
         click: e => {
-            S.score += getStats().eCpc;
+            const st = getStats();
+            const isCrit = Math.random() < st.crit;
+            const gain = st.eCpc * (isCrit ? 10 : 1); 
+            S.score += gain;
+            
             const rip = document.createElement('div');
-            rip.className = 'ripple'; rip.style.left = e.clientX + 'px'; rip.style.top = e.clientY + 'px';
+            rip.className = 'ripple' + (isCrit ? ' is-crit' : '');
+            rip.style.left = e.clientX + 'px'; rip.style.top = e.clientY + 'px';
             document.body.appendChild(rip); setTimeout(() => rip.remove(), 600);
             refresh();
         },
@@ -256,6 +313,7 @@ const App = (() => {
             S.buyMult = m;
             document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
+            saveGame();
         },
         toggleMusic: () => {
             if(musicPlaying) { stopFns.forEach(f=>f()); musicPlaying=false; document.getElementById('music-btn').innerText='♪ MUSIC OFF'; document.getElementById('music-btn').classList.remove('playing'); return; }
@@ -270,14 +328,28 @@ const App = (() => {
         rebirth: () => {
             const rbG = Math.floor(Math.pow(S.score/1e6, 0.4));
             if(rbG > 0) {
-                S.rebirths += rbG; S.score=0; S.cps=0; S.cpc=1; S.midasMult=1;
+                S.rebirths += rbG; S.score=0; S.cps=0; S.cpc=1; S.crit=0.05; S.midasMult=1;
                 S.upgrades.forEach((u,i)=> { u.lvl=0; u.c=BASE_UPGRADES[i].c; });
+                saveGame();
                 renderShop();
             }
         },
+        wipeSave: () => {
+            localStorage.removeItem('trentonAscendedSave');
+            location.reload(); // Refresh the page to clear everything
+        },
         init: () => {
+            loadGame();
             renderShop();
+            
+            // Core Game Loop (runs 10 times a second)
             setInterval(() => { S.score += getStats().eCps / 10; refresh(); }, 100);
+            
+            // Auto-Save Loop (runs every 10 seconds)
+            setInterval(saveGame, 10000); 
+            
+            // Save if the user tries to close the tab
+            window.addEventListener('beforeunload', saveGame);
         }
     };
 })();

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Multiverse Edition</title>
+<title>Trenton Ascended: Fast Start</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
@@ -14,7 +14,6 @@
         --glass-border: rgba(255, 255, 255, 0.08);
         --accent: #00d2ff;
         --rebirth-color: #9b59b6;
-        --crit-color: #ff4757;
         --cost-color: #2ecc71;
         --text-primary: #e6edf3;
         --fira-font: 'Fira Code', monospace;
@@ -35,7 +34,7 @@
 
     #game-layout { display: grid; grid-template-columns: 1fr 450px; height: calc(100% - 120px); width: 100vw; }
 
-    #main-content { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+    #main-content { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; position: relative;}
     
     .header-group h1 { color: var(--accent); font-size: 2.5rem; margin: 0; letter-spacing: 2px; }
     .rebirth-stat { color: var(--rebirth-color); font-weight: bold; margin-bottom: 20px; }
@@ -43,62 +42,51 @@
     #clickable-image {
         cursor: pointer; width: 200px; height: 200px; object-fit: cover; border-radius: 50%;
         box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); transition: all 0.05s; border: 3px solid var(--accent);
-        user-select: none; -webkit-user-drag: none;
+        user-select: none;
     }
     #clickable-image:active { transform: scale(0.92); filter: brightness(1.3); }
 
     #score-container {
         background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px;
         padding: 15px 40px; margin-top: 25px; font-size: 3rem; backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     /* Upgrades Sidebar */
     #upgrades-panel {
         background: rgba(0, 0, 0, 0.5); border-left: 1px solid var(--glass-border);
-        padding: 20px; overflow-y: overlay; display: flex; flex-direction: column; gap: 10px;
-        backdrop-filter: blur(10px);
+        padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
     }
 
     .upgrade-card {
         background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px;
-        padding: 12px; cursor: pointer; transition: 0.2s; position: relative;
+        padding: 10px; cursor: pointer; transition: 0.2s; position: relative;
     }
     .upgrade-card:hover:not(.disabled) { background: rgba(255,255,255,0.07); border-color: var(--accent); }
     .upgrade-card.disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
 
-    .upgrade-title { color: var(--accent); font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between;}
-    .upgrade-desc { font-size: 0.75rem; color: #8b949e; margin: 4px 0; }
-    .upgrade-cost { color: var(--cost-color); font-weight: bold; font-size: 0.9rem; }
+    .upgrade-title { color: var(--accent); font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between;}
+    .upgrade-cost { color: var(--cost-color); font-weight: bold; font-size: 0.85rem; }
 
-    /* Rebirth Button */
+    /* Tooltip / Info Box */
+    #info-box {
+        position: absolute; bottom: 20px; left: 20px; width: 250px;
+        background: rgba(0, 0, 0, 0.8); border: 1px solid var(--accent);
+        padding: 15px; border-radius: 10px; font-size: 0.8rem; text-align: left;
+        backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+
     #rebirth-btn {
-        margin-top: 20px; padding: 15px; background: var(--rebirth-color); color: white;
+        margin-top: 20px; padding: 12px; background: var(--rebirth-color); color: white;
         border: none; border-radius: 8px; cursor: pointer; font-family: var(--fira-font);
         font-weight: bold; width: 100%; transition: 0.3s;
     }
     #rebirth-btn:disabled { background: #333; opacity: 0.5; cursor: not-allowed; }
 
-    /* Stats Footer */
     #stats-panel {
         background: rgba(0, 0, 0, 0.8); border-top: 1px solid var(--glass-border);
         height: 120px; display: flex; justify-content: space-around; align-items: center;
-        backdrop-filter: blur(20px);
     }
-    .stat-box { text-align: center; }
-    .stat-box label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 5px; }
-    .stat-box span { color: var(--accent); font-weight: bold; font-size: 1.5rem; }
-
-    /* Crit Popup Animation */
-    .crit-text {
-        position: absolute; color: var(--crit-color); font-weight: bold;
-        pointer-events: none; animation: floatUp 0.8s ease-out forwards;
-        z-index: 100; font-size: 1.5rem; text-shadow: 0 0 10px black;
-    }
-    @keyframes floatUp {
-        0% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-100px); }
-    }
+    .stat-box span { color: var(--accent); font-weight: bold; font-size: 1.4rem; }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
@@ -110,187 +98,113 @@
 
 <div id="game-layout">
     <div id="main-content">
+        <div id="info-box">Hover an upgrade for info...</div>
         <div class="header-group">
             <h1>TRENTON ASCENDED</h1>
             <div class="rebirth-stat" id="rebirth-mult">Rebirth Multiplier: 1.0x</div>
         </div>
-        
-        <div style="position: relative;">
-            <img id="clickable-image" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="Game.click(event)">
-        </div>
-        
+        <img id="clickable-image" src="https://lh3.googleusercontent.com/a-/ALV-UjXi81K-KPYiR-v80hz3zt2OidSJgCqq13shIWrh3yzXcUt-ClaL=s512-w512-h512-c-k-no" alt="Trenton" onclick="Game.click(event)">
         <div id="score-container">0 Power</div>
-        
-        <div style="width: 300px;">
-            <button id="rebirth-btn" onclick="Game.rebirth()" disabled>
-                REBIRTH<br>
-                <span style="font-size: 0.7rem; font-weight: normal;">Requires 1.0M Power</span>
-            </button>
+        <div style="width: 250px;">
+            <button id="rebirth-btn" onclick="Game.rebirth()" disabled>REBIRTH (100K)</button>
         </div>
     </div>
-    
-    <div id="upgrades-panel">
-        </div>
+    <div id="upgrades-panel"></div>
 </div>
 
 <div id="stats-panel">
-    <div class="stat-box"><label>CLICKS PER SEC</label><span id="st-cps">0</span></div>
-    <div class="stat-box"><label>POWER PER CLICK</label><span id="st-cpc">1</span></div>
-    <div class="stat-box"><label>CRIT CHANCE</label><span id="st-crit">5%</span></div>
+    <div class="stat-box"><label>CPS</label><br><span id="st-cps">0</span></div>
+    <div class="stat-box"><label>CPC</label><br><span id="st-cpc">1</span></div>
+    <div class="stat-box"><label>CRIT</label><br><span id="st-crit">5%</span></div>
 </div>
 
 <script>
-    // Snowfall
-    const snow = document.getElementById('snow-container');
-    for (let i = 0; i < 40; i++) {
-        const flake = document.createElement('div');
-        flake.className = 'snowflake';
-        flake.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*4+3}s;animation-delay:${Math.random()*5}s;opacity:${Math.random()}`;
-        snow.appendChild(flake);
-    }
-
     const Game = (() => {
         let score = 0;
-        let totalCps = 0;
-        let totalCpc = 1;
-        let rebirths = 0;
-        let critChance = 0.05;
-        let clickRegistry = [];
+        let tCps = 0, tCpc = 1, rebirths = 0, crit = 0.05;
+        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx"];
 
-        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td"];
-
-        const format = (num) => {
-            if (num < 1000) return Math.floor(num);
-            const exp = Math.floor(Math.log10(num) / 3);
-            const suffix = suffixes[exp] || "??";
-            const shortVal = (num / Math.pow(10, exp * 3)).toFixed(2);
-            return shortVal + suffix;
+        const format = (n) => {
+            if (n < 1000) return Math.floor(n);
+            const e = Math.floor(Math.log10(n) / 3);
+            return (n / Math.pow(10, e * 3)).toFixed(2) + suffixes[e];
         };
 
         const upData = [
-            { id: 'mass', n: 'Mass Gain', d: 'He gets massive.', cps: 1, cpc: 0, c: 15 },
-            { id: 'strength', n: 'Strength Gain', d: 'He gets stronger.', cps: 0, cpc: 3, c: 100 },
-            { id: 'shit', n: 'Shit Power', d: 'Enhanced bowel power.', cps: 5, cpc: 5, c: 500 },
-            { id: 'neural', n: 'Neural Overclock', d: 'Faster processing.', cps: 20, cpc: 0, c: 2500 },
-            { id: 'crit', n: 'Focus Training', d: '+2% Crit Chance.', cps: 0, cpc: 0, crit: 0.02, c: 5000 },
-            { id: 'quantum', n: 'Quantum Biceps', d: 'Exist in 2 gyms.', cps: 0, cpc: 50, c: 15000 },
-            { id: 'gravity', n: 'Gravitational Pull', d: 'Attract power.', cps: 150, cpc: 0, c: 50000 },
-            { id: 'nano', n: 'Nanobot Blood', d: 'Cellular efficiency.', cps: 400, cpc: 100, c: 200000 },
-            { id: 'cyber', n: 'Cybernetic Spine', d: 'Infinite posture.', cps: 1200, cpc: 0, c: 750000 },
-            { id: 'void', n: 'Void Lung', d: 'Breathe anywhere.', cps: 0, cpc: 1000, c: 2500000 },
-            { id: 'solar', n: 'Solar Synthesis', d: 'Eat the sun.', cps: 10000, cpc: 0, c: 10000000 },
-            { id: 'time', n: 'Temporal Warp', d: 'Click yesterday.', cps: 0, cpc: 5000, c: 50000000 },
-            { id: 'galaxy', n: 'Galaxy Brain', d: 'Think in stars.', cps: 100000, cpc: 10000, c: 250000000 },
-            { id: 'dim', n: 'Dimensional Shift', d: 'Farm other Trentons.', cps: 1000000, cpc: 0, c: 1000000000 },
-            { id: 'god', n: 'The Singularity', d: 'Absolute Trenton.', cps: 5000000, cpc: 5000000, c: 5000000000 }
+            { id: 'm', n: 'Mass Gain', d: '+1 CPS', cps: 1, cpc: 0, c: 10, s: 1.2 },
+            { id: 's', n: 'Strength Gain', d: '+3 CPC', cps: 0, cpc: 3, c: 50, s: 1.25 },
+            { id: 'sh', n: 'Shit Power', d: '+5 CPS / +5 CPC', cps: 5, cpc: 5, c: 200, s: 1.3 },
+            { id: 'n', n: 'Neural Overclock', d: '+25 CPS', cps: 25, cpc: 0, c: 1000, s: 1.35 },
+            { id: 'cr', n: 'Focus Training', d: '+3% Crit Chance', cps: 0, cpc: 0, cr: 0.03, c: 3000, s: 1.4 },
+            { id: 'q', n: 'Quantum Biceps', d: '+60 CPC', cps: 0, cpc: 60, c: 8000, s: 1.4 },
+            { id: 'g', n: 'Gravity Pull', d: '+200 CPS', cps: 200, cpc: 0, c: 20000, s: 1.45 },
+            { id: 'nb', n: 'Nanobot Blood', d: '+500 CPS/CPC', cps: 500, cpc: 500, c: 75000, s: 1.5 },
+            { id: 'cy', n: 'Cyber Spine', d: '+2K CPS', cps: 2000, cpc: 0, c: 250000, s: 1.5 },
+            { id: 'v', n: 'Void Lung', d: '+5K CPC', cps: 0, cpc: 5000, c: 1000000, s: 1.55 },
+            { id: 'sol', n: 'Solar Synth', d: '+25K CPS', cps: 25000, cpc: 0, c: 5000000, s: 1.6 }
         ];
 
-        // Initialize UI Upgrades
         const panel = document.getElementById('upgrades-panel');
+        const info = document.getElementById('info-box');
+
         upData.forEach((u, i) => {
             const card = document.createElement('div');
             card.className = 'upgrade-card disabled';
             card.id = `up-${u.id}`;
+            card.innerHTML = `<div class="upgrade-title"><span>${u.n}</span> <span id="l-${u.id}">0</span></div><div class="upgrade-cost">Cost: <span id="c-${u.id}">${format(u.c)}</span></div>`;
             card.onclick = () => buy(i);
-            card.innerHTML = `
-                <div class="upgrade-title"><span>${u.n}</span> <span id="lvl-${u.id}">0</span></div>
-                <div class="upgrade-desc">${u.d}</div>
-                <div class="upgrade-cost">Cost: <span id="cost-${u.id}">${format(u.c)}</span></div>
-            `;
-            u.lvl = 0;
+            card.onmouseenter = () => { info.style.opacity = 1; info.innerHTML = `<strong>${u.n}</strong><br>${u.d}<br><br>Level: ${u.lvl}`; };
+            card.onmouseleave = () => { info.style.opacity = 0; };
+            u.lvl = 0; u.baseC = u.c;
             panel.appendChild(card);
         });
 
-        const buy = (idx) => {
-            const u = upData[idx];
+        const buy = (i) => {
+            const u = upData[i];
             if (score >= u.c) {
-                score -= u.c;
-                u.lvl++;
-                if(u.cps) totalCps += u.cps;
-                if(u.cpc) totalCpc += u.cpc;
-                if(u.crit) critChance += u.crit;
-                u.c *= 1.55;
-                refresh();
+                score -= u.c; u.lvl++;
+                if(u.cps) tCps += u.cps; if(u.cpc) tCpc += u.cpc; if(u.cr) crit += u.cr;
+                u.c *= u.s; refresh();
             }
         };
 
         const refresh = () => {
-            const mult = 1 + (rebirths * 0.5);
+            const m = 1 + (rebirths * 0.5);
             document.getElementById('score-container').innerText = format(score) + " Power";
-            document.getElementById('st-cps').innerText = format(totalCps * mult);
-            document.getElementById('st-cpc').innerText = format(totalCpc * mult);
-            document.getElementById('st-crit').innerText = Math.round(critChance * 100) + "%";
-            document.getElementById('rebirth-mult').innerText = `Rebirth Multiplier: ${mult.toFixed(1)}x (Rebirths: ${rebirths})`;
+            document.getElementById('st-cps').innerText = format(tCps * m);
+            document.getElementById('st-cpc').innerText = format(tCpc * m);
+            document.getElementById('st-crit').innerText = Math.round(crit * 100) + "%";
+            document.getElementById('rebirth-mult').innerText = `Multiplier: ${m.toFixed(1)}x (Rebirths: ${rebirths})`;
 
             upData.forEach(u => {
-                document.getElementById(`cost-${u.id}`).innerText = format(u.c);
-                document.getElementById(`lvl-${u.id}`).innerText = u.lvl;
-                const el = document.getElementById(`up-${u.id}`);
-                score >= u.c ? el.classList.remove('disabled') : el.classList.add('disabled');
+                document.getElementById(`c-${u.id}`).innerText = format(u.c);
+                document.getElementById(`l-${u.id}`).innerText = u.lvl;
+                score >= u.c ? document.getElementById(`up-${u.id}`).classList.remove('disabled') : document.getElementById(`up-${u.id}`).classList.add('disabled');
             });
 
             const rBtn = document.getElementById('rebirth-btn');
-            if (score >= 1000000) {
-                rBtn.disabled = false;
-                rBtn.innerHTML = `REBIRTH<br><span style="font-size: 0.7rem;">Get +0.5x Multiplier</span>`;
-            } else {
-                rBtn.disabled = true;
-            }
+            rBtn.disabled = score < 100000;
         };
 
-        setInterval(() => { 
-            const mult = 1 + (rebirths * 0.5);
-            score += (totalCps * mult) / 10; 
-            refresh(); 
-        }, 100);
+        setInterval(() => { score += (tCps * (1 + rebirths * 0.5)) / 10; refresh(); }, 100);
 
         return {
-            click: (e) => {
-                const now = Date.now();
-                clickRegistry = clickRegistry.filter(t => now - t < 1000);
-                clickRegistry.push(now);
-                if (clickRegistry.length > 25) return;
-
-                const mult = 1 + (rebirths * 0.5);
-                let gain = totalCpc * mult;
-                
-                // Crit Logic
-                if (Math.random() < critChance) {
-                    gain *= 5;
-                    createCritPopup(e.pageX, e.pageY);
-                }
-
-                score += gain;
-                refresh();
-            },
+            click: () => { score += tCpc * (1 + rebirths * 0.5) * (Math.random() < crit ? 5 : 1); refresh(); },
             rebirth: () => {
-                if (score >= 1000000) {
-                    rebirths++;
-                    score = 0;
-                    totalCps = 0;
-                    totalCpc = 1;
-                    critChance = 0.05;
-                    upData.forEach(u => {
-                        u.lvl = 0;
-                        u.c = u.id === 'mass' ? 15 : u.id === 'strength' ? 100 : u.c; // Simplified reset
-                    });
-                    // Reset initial costs properly
-                    const baseCosts = [15, 100, 500, 2500, 5000, 15000, 50000, 200000, 750000, 2500000, 10000000, 50000000, 250000000, 1000000000, 5000000000];
-                    upData.forEach((u, i) => u.c = baseCosts[i]);
+                if (score >= 100000) {
+                    rebirths++; score = 0; tCps = 0; tCpc = 1; crit = 0.05;
+                    upData.forEach(u => { u.lvl = 0; u.c = u.baseC; });
                     refresh();
                 }
             }
         };
     })();
 
-    function createCritPopup(x, y) {
-        const p = document.createElement('div');
-        p.className = 'crit-text';
-        p.innerText = 'CRIT! x5';
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 800);
+    const snow = document.getElementById('snow-container');
+    for (let i = 0; i < 40; i++) {
+        const f = document.createElement('div'); f.className = 'snowflake';
+        f.style.cssText = `width:${Math.random()*4+2}px;height:${Math.random()*4+2}px;left:${Math.random()*100}%;animation-duration:${Math.random()*4+3}s;opacity:${Math.random()}`;
+        snow.appendChild(f);
     }
 </script>
 </body>

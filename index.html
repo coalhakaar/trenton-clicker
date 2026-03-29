@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Bulk Rebirth</title>
+<title>Trenton Ascended: Legacy Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg: #030508;
+        --bg: #020406;
         --accent: #00d2ff;
         --glass: rgba(255, 255, 255, 0.04);
         --glass-border: rgba(255, 255, 255, 0.1);
@@ -24,92 +24,93 @@
     }
 
     #snow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.3; }
+    .flake { position: absolute; top: -10%; background: white; border-radius: 50%; animation: fall linear infinite; opacity: 0.2; }
     @keyframes fall { to { transform: translateY(110vh); } }
 
     .ripple {
         position: absolute; border: 2px solid var(--accent); border-radius: 50%;
         transform: translate(-50%, -50%); pointer-events: none;
-        animation: ripple-out 0.5s linear forwards; z-index: 99;
+        animation: ripple-out 0.4s linear forwards; z-index: 99;
     }
     @keyframes ripple-out {
         from { width: 0; height: 0; opacity: 1; }
-        to { width: 160px; height: 160px; opacity: 0; }
+        to { width: 200px; height: 200px; opacity: 0; }
     }
 
     .popup {
         position: absolute; font-weight: bold; pointer-events: none;
-        z-index: 1000; animation: float-up 0.8s ease-out forwards;
-        text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        z-index: 1000; animation: float-up 0.7s ease-out forwards;
+        text-shadow: 0 0 10px rgba(0,0,0,0.8);
     }
     @keyframes float-up {
-        0% { transform: translate(-50%, 0); opacity: 1; }
-        100% { transform: translate(-50%, -120px); opacity: 0; }
+        0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -150px) scale(1.2); opacity: 0; }
     }
-    .crit-text { color: var(--crit); font-size: 1.8rem; filter: drop-shadow(0 0 8px var(--crit)); }
-    .normal-text { color: var(--accent); font-size: 1.1rem; }
+    .crit-text { color: var(--crit); font-size: 2rem; filter: drop-shadow(0 0 12px var(--crit)); }
+    .normal-text { color: var(--accent); font-size: 1.2rem; }
 
     #audio-controls { position: fixed; top: 20px; left: 20px; z-index: 100; }
     .audio-btn { background: var(--glass); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(10px); }
 
-    #game { display: grid; grid-template-columns: 1fr 440px; height: 100vh; }
+    #game { display: grid; grid-template-columns: 1fr 460px; height: 100vh; }
     #main { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-bottom: 80px; }
-    h1 { font-size: 2.2rem; color: var(--accent); letter-spacing: 6px; margin-bottom: 30px; filter: drop-shadow(0 0 10px var(--accent)); }
+    h1 { font-size: 2.2rem; color: var(--accent); letter-spacing: 6px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--accent)); }
     
     #trenton-container { position: relative; display: inline-block; }
     #trenton {
-        width: 250px; height: 250px; border-radius: 50%; object-fit: cover;
+        width: 260px; height: 260px; border-radius: 50%; object-fit: cover;
         border: 3px solid var(--accent); cursor: pointer; transition: 0.05s;
-        box-shadow: 0 0 50px rgba(0, 210, 255, 0.2); user-select: none;
+        box-shadow: 0 0 60px rgba(0, 210, 255, 0.15); user-select: none;
     }
-    #trenton:active { transform: scale(0.94); filter: brightness(1.4); }
+    #trenton:active { transform: scale(0.92); filter: brightness(1.5); }
 
     #score-box { 
         background: var(--glass); border: 1px solid var(--glass-border); padding: 15px 60px;
-        margin-top: 35px; border-radius: 60px; font-size: 3.2rem; backdrop-filter: blur(15px);
+        margin-top: 35px; border-radius: 60px; font-size: 3rem; backdrop-filter: blur(15px);
+        min-width: 200px; text-align: center;
     }
 
     #shop { 
-        background: rgba(0,0,0,0.5); border-left: 1px solid var(--glass-border); 
-        padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-        backdrop-filter: blur(25px);
+        background: rgba(0,0,0,0.6); border-left: 1px solid var(--glass-border); 
+        padding: 25px; overflow-y: scroll; display: flex; flex-direction: column; gap: 12px;
+        backdrop-filter: blur(30px);
     }
 
     .card {
         background: var(--glass); border: 1px solid var(--glass-border);
-        padding: 20px; border-radius: 14px; cursor: pointer; transition: 0.3s;
-        position: relative; display: flex; flex-direction: column; gap: 8px;
+        padding: 16px; border-radius: 12px; cursor: pointer; transition: 0.2s;
+        position: relative; display: flex; flex-direction: column; gap: 4px;
     }
-    .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-8px); border-color: var(--accent); }
-    .card.is-midas { border-color: var(--midas); box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.1); }
-    .card.is-midas .u-title { color: var(--midas); text-shadow: 0 0 5px var(--midas); }
-    .card.locked { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
+    .card:hover:not(.locked) { background: rgba(255,255,255,0.08); transform: translateX(-5px); border-color: var(--accent); }
+    .card.is-midas { border-color: var(--midas); background: rgba(255, 215, 0, 0.05); }
+    .card.is-midas .u-title { color: var(--midas); text-shadow: 0 0 8px var(--midas); }
+    .card.locked { opacity: 0.1; cursor: not-allowed; filter: grayscale(1); }
 
-    .u-title { font-weight: bold; color: var(--accent); font-size: 1.1rem; letter-spacing: 1px; }
-    .u-desc { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
-    .u-benefit { font-size: 0.85rem; color: var(--success); font-weight: bold; }
-    .u-cost { color: #fff; font-size: 1rem; margin-top: 5px; font-weight: bold; }
+    .u-title { font-weight: bold; color: var(--accent); font-size: 1rem; letter-spacing: 0.5px; }
+    .u-desc { font-size: 0.75rem; color: #888; line-height: 1.4; }
+    .u-benefit { font-size: 0.8rem; color: var(--success); font-weight: bold; }
+    .u-cost { color: #fff; font-size: 0.9rem; margin-top: 4px; font-weight: 700; }
     .u-lvl-badge {
-        position: absolute; top: 15px; right: 15px; font-size: 0.75rem;
-        background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 6px; color: var(--accent);
+        position: absolute; top: 12px; right: 12px; font-size: 0.65rem;
+        background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: var(--accent);
     }
 
     #stats { 
-        position: fixed; bottom: 0; left: 0; width: calc(100% - 440px); height: 110px;
-        background: rgba(0,0,0,0.8); border-top: 1px solid var(--glass-border);
-        display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px);
+        position: fixed; bottom: 0; left: 0; width: calc(100% - 460px); height: 110px;
+        background: rgba(0,0,0,0.85); border-top: 1px solid var(--glass-border);
+        display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(15px);
     }
-    .stat label { font-size: 0.75rem; color: #8b949e; display: block; text-transform: uppercase; letter-spacing: 1px; }
-    .stat span { color: var(--accent); font-weight: bold; font-size: 1.7rem; }
+    .stat label { font-size: 0.7rem; color: #666; display: block; text-transform: uppercase; letter-spacing: 2px; }
+    .stat span { color: var(--accent); font-weight: bold; font-size: 1.5rem; }
 
     #rebirth-btn {
         width: 100%; padding: 16px; background: var(--rebirth); border: none; border-radius: 10px;
         color: white; font-family: var(--fira); font-weight: bold; cursor: pointer;
-        margin-top: 25px; transition: 0.3s; font-size: 1rem;
+        margin-top: 25px; transition: 0.3s; font-size: 0.9rem;
     }
-    #rebirth-btn:disabled { background: #1a1a1a; opacity: 0.4; }
+    #rebirth-btn:disabled { background: #111; color: #444; cursor: not-allowed; }
 
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
@@ -136,7 +137,7 @@
         <div style="width: 320px;">
             <button id="rebirth-btn" onclick="App.rebirth()" disabled>REBIRTH (+0)</button>
             <div style="text-align: center; font-size: 0.8rem; margin-top: 12px; color: var(--rebirth)" id="rb-status">0 Rebirths</div>
-            <div style="text-align: center; font-size: 0.7rem; color: #666;" id="rb-next-cost">Cost: 100K</div>
+            <div style="text-align: center; font-size: 0.7rem; color: #555;" id="rb-next-cost">Cost: 100K</div>
         </div>
     </div>
     <div id="shop"></div>
@@ -150,24 +151,36 @@
 
 <script>
     const App = (() => {
-        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+        const SAVE_KEY = 'trenton_ascended_stable_v1';
+        const OLD_KEYS = ['trenton_v3_expansion_save', 'trenton_v2_bulk_save', 'trenton_v2_final_save'];
+        
+        const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "UDe", "DDe", "TDe", "QdDe", "QnDe", "SxDe", "SpDe", "OcDe", "NoDe", "Vg"];
         
         const baseUpgrades = [
-            { id: 'm', n: 'Mass Gain', d: 'Trenton bulks up his physical form.', b: '+1 CPS', cps: 1, c: 10, s: 1.15 },
-            { id: 's', n: 'Strength Training', d: 'Intense lifting sessions.', b: '+3 CPC', cpc: 3, c: 50, s: 1.2 },
-            { id: 'sh', n: 'Bio-Power', d: 'Optimized metabolic output.', b: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.25 },
-            { id: 'n', n: 'Neural Pulse', d: 'Brain overclocking protocols.', b: '+45 CPS', cps: 45, c: 1500, s: 1.28 },
-            { id: 'cr', n: 'Focus Aura', d: 'Sharper mental concentration.', b: '+3% Crit', cr: 0.03, c: 5000, s: 1.35 },
-            { id: 'q', n: 'Quantum Lift', d: 'Lifting weights in 4D space.', b: '+120 CPC', cpc: 120, c: 18000, s: 1.3 },
-            { id: 'g', n: 'Gravity Well', d: 'Passive power attraction.', b: '+600 CPS', cps: 600, c: 65000, s: 1.3 },
-            { id: 'nb', n: 'Nano-Repair', d: 'Self-fixing cellular tissue.', b: '+2K CPS / +1K CPC', cps: 2000, cpc: 1000, c: 250000, s: 1.32 },
-            { id: 'cy', n: 'Cyber Frame', d: 'Reinforced titanium chassis.', b: '+10K CPS', cps: 10000, c: 1200000, s: 1.35 },
-            { id: 'v', n: 'Void Breath', d: 'Oxygen is no longer required.', b: '+50K CPC', cpc: 50000, c: 10000000, s: 1.35 },
-            { id: 'sl', n: 'Solar Synthesis', d: 'Direct energy from the sun.', b: '+150K CPS', cps: 150000, c: 60000000, s: 1.4 },
-            { id: 'ga', n: 'Galaxy Mind', d: 'Processing the cosmos.', b: '+3M CPS', cps: 3000000, c: 6000000000, s: 1.42 },
-            { id: 'ti', n: 'Time Warp', d: 'Gain power before you click.', b: '+20M CPC', cpc: 20000000, c: 80000000000, s: 1.45 },
-            { id: 'sg', n: 'The Singularity', d: 'The final stage of being.', b: '+100B CPS', cps: 100000000000, c: 1000000000000000, s: 1.6 },
-            { id: 'mi', n: 'Midas Touch', d: 'Everything turns to gold.', b: '3x Total Power', midas: 3, c: 1000000000000000000, s: 5, isMidas: true }
+            { id: 'm', n: 'Mass Gain', d: 'Basic muscle growth.', b: '+1 CPS', cps: 1, c: 10, s: 1.15 },
+            { id: 's', n: 'Strength Training', d: 'Intense lifting.', b: '+3 CPC', cpc: 3, c: 50, s: 1.18 },
+            { id: 'sh', n: 'Bio-Power', d: 'Metabolic optimization.', b: '+10 CPS / +5 CPC', cps: 10, cpc: 5, c: 250, s: 1.22 },
+            { id: 'n', n: 'Neural Pulse', d: 'Brain overclock.', b: '+45 CPS', cps: 45, c: 1500, s: 1.25 },
+            { id: 'cr', n: 'Focus Aura', d: 'Critical focus.', b: '+3% Crit', cr: 0.03, c: 5000, s: 1.3 },
+            { id: 'q', n: 'Quantum Lift', d: '4D weights.', b: '+120 CPC', cpc: 120, c: 18000, s: 1.28 },
+            { id: 'g', n: 'Gravity Well', d: 'Power attraction.', b: '+600 CPS', cps: 600, c: 75000, s: 1.3 },
+            { id: 'nb', n: 'Nano-Repair', d: 'Self-fixing cells.', b: '+2K CPS / +1K CPC', cps: 2000, cpc: 1000, c: 300000, s: 1.32 },
+            { id: 'cy', n: 'Cyber Frame', d: 'Titanium chassis.', b: '+10K CPS', cps: 10000, c: 1500000, s: 1.35 },
+            { id: 'v', n: 'Void Breath', d: 'No oxygen required.', b: '+50K CPC', cpc: 50000, c: 15000000, s: 1.38 },
+            { id: 'sl', n: 'Solar Synthesis', d: 'Solar power.', b: '+150K CPS', cps: 150000, c: 80000000, s: 1.4 },
+            { id: 'ga', n: 'Galaxy Mind', d: 'Universal logic.', b: '+3M CPS', cps: 3000000, c: 1000000000, s: 1.42 },
+            { id: 'ti', n: 'Time Warp', d: 'Power from the future.', b: '+20M CPC', cpc: 20000000, c: 80000000000, s: 1.45 },
+            { id: 'cb', n: 'Chrono-Buffer', d: 'Store time within cells.', b: '+80M CPC', cpc: 80000000, c: 600000000000, s: 1.45 },
+            { id: 'dt', n: 'Dimensional Tear', d: 'Other reality power.', b: '+300M CPS', cps: 300000000, c: 5000000000000, s: 1.48 },
+            { id: 'af', n: 'Antimatter Forge', d: 'Harness annihilation.', b: '+2B CPS', cps: 2000000000, c: 80000000000000, s: 1.5 },
+            { id: 'nc', n: 'Neutron Core', d: 'Density of a dying star.', b: '+10B CPC', cpc: 10000000000, c: 1000000000000000, s: 1.52 },
+            { id: 'eh', n: 'Event Horizon', d: 'Nothing escapes.', b: '+150B CPS', cps: 150000000000, c: 25000000000000000, s: 1.55 },
+            { id: 'dm', n: 'Dark Infusion', d: 'Invisible mass.', b: '+800B CPS', cps: 800000000000, c: 600000000000000000, s: 1.55 },
+            { id: 'uc', n: 'Universal Constant', d: 'Law of physics.', b: '+4T CPC', cpc: 4000000000000, c: 12000000000000000000, s: 1.58 },
+            { id: 'cbg', n: 'Cosmic Background', d: 'Echo of the Big Bang.', b: '+50T CPS', cps: 50000000000000, c: 300000000000000000000, s: 1.6 },
+            { id: 'ta', n: 'The Great Attractor', d: 'Pulling everything.', b: '+400T CPS', cps: 400000000000000, c: 8000000000000000000000, s: 1.62 },
+            { id: 'sg', n: 'The Singularity', d: 'The end.', b: '+100Qa CPS', cps: 100000000000000000, c: 500000000000000000000000, s: 1.7 },
+            { id: 'mi', n: 'Midas Touch', d: 'Pure Gold.', b: '3x Total Power', midas: 3, c: 1e30, s: 10, isMidas: true }
         ];
 
         let state = {
@@ -179,22 +192,36 @@
         const format = (n) => {
             if (n < 1000) return Math.floor(n);
             const e = Math.floor(Math.log10(n) / 3);
-            return (n / Math.pow(10, e * 3)).toFixed(2) + (suffixes[e] || "??");
+            if (e >= suffixes.length) return n.toExponential(2);
+            return (n / Math.pow(10, e * 3)).toFixed(2) + suffixes[e];
         };
 
-        const save = () => localStorage.setItem('trenton_v2_bulk_save', JSON.stringify(state));
+        const save = () => localStorage.setItem(SAVE_KEY, JSON.stringify(state));
 
         const load = () => {
-            const raw = localStorage.getItem('trenton_v2_bulk_save');
+            // Check for migrations first
+            let raw = localStorage.getItem(SAVE_KEY);
+            if (!raw) {
+                for (let oldKey of OLD_KEYS) {
+                    const oldData = localStorage.getItem(oldKey);
+                    if (oldData) { raw = oldData; break; }
+                }
+            }
+
             if (raw) {
                 const saved = JSON.parse(raw);
-                saved.upgrades.forEach(su => {
-                    const u = state.upgrades.find(item => item.id === su.id);
-                    if(u) { u.lvl = su.lvl; u.c = su.c; }
+                // Robust upgrade loading
+                state.upgrades.forEach(u => {
+                    const savedU = saved.upgrades.find(su => su.id === u.id);
+                    if (savedU) { u.lvl = savedU.lvl; u.c = savedU.c; }
                 });
-                state.score = saved.score; state.cps = saved.cps; state.cpc = saved.cpc;
-                state.rebirths = saved.rebirths; state.crit = saved.crit;
-                state.rebirthCost = saved.rebirthCost; state.midasMult = saved.midasMult || 1;
+                state.score = saved.score || 0;
+                state.cps = saved.cps || 0;
+                state.cpc = saved.cpc || 1;
+                state.rebirths = saved.rebirths || 0;
+                state.crit = saved.crit || 0.05;
+                state.rebirthCost = saved.rebirthCost || 100000;
+                state.midasMult = saved.midasMult || 1;
             }
         };
 
@@ -213,13 +240,13 @@
         const createVisuals = (e, val, isCrit) => {
             const ripple = document.createElement('div');
             ripple.className = 'ripple'; ripple.style.left = `${e.pageX}px`; ripple.style.top = `${e.pageY}px`;
-            document.body.appendChild(ripple); setTimeout(() => ripple.remove(), 500);
+            document.body.appendChild(ripple); setTimeout(() => ripple.remove(), 400);
 
             const popup = document.createElement('div');
             popup.className = `popup ${isCrit ? 'crit-text' : 'normal-text'}`;
             popup.style.left = `${e.pageX}px`; popup.style.top = `${e.pageY}px`;
             popup.innerText = (isCrit ? 'CRIT! ' : '+') + format(val);
-            document.body.appendChild(popup); setTimeout(() => popup.remove(), 800);
+            document.body.appendChild(popup); setTimeout(() => popup.remove(), 700);
         };
 
         const buy = (i) => {
@@ -240,11 +267,10 @@
             document.getElementById('st-crit').innerText = Math.min(Math.round(state.crit * 100), 100) + "%";
             document.getElementById('rb-status').innerText = `${state.rebirths} Rebirths (Mult: ${mult.toFixed(1)}x)`;
             
-            // Bulk Rebirth Calculation
             let possibleRebirths = 0;
             let nextCost = state.rebirthCost;
             let tempScore = state.score;
-            while(tempScore >= nextCost) {
+            while(tempScore >= nextCost && possibleRebirths < 1000) {
                 tempScore -= nextCost;
                 nextCost *= 1.7;
                 possibleRebirths++;

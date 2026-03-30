@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trenton Ascended: Rebirth Cost Update</title>
+<title>Trenton Ascended: Rebirth Scaling Update</title>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -46,8 +46,9 @@
         backdrop-filter: blur(10px); text-align: center; color: #fff;
     }
 
-    #rb-info { margin-top: 15px; text-align: center; }
-    #rb-price-tag { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+    #rb-info { margin-top: 15px; text-align: center; background: rgba(162, 155, 254, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(162, 155, 254, 0.2); }
+    #rb-count-tag { font-size: 1.2rem; color: var(--rebirth); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+    #rb-price-tag { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
 
     #music-btn { position: fixed; top: 20px; left: 20px; z-index: 100; background: #000; border: 1px solid #222; color: #444; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-size: 0.6rem; font-family: var(--fira); transition: 0.2s; }
     #music-btn.playing { color: var(--success); border-color: var(--success); }
@@ -70,8 +71,6 @@
     .card:hover:not(.locked) { border-color: var(--accent); background: #161b22; transform: translateX(6px); }
     .card.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
     .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); border-radius: 12px 0 0 12px; }
-    .card.is-midas::before { background: var(--midas); }
-    .card.is-crit-up::before { background: var(--crit); }
 
     .card-inner { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
@@ -105,8 +104,9 @@
         <div id="score-box">0</div>
         
         <div id="rb-info">
-            <div id="rb-price-tag">Rebirth Cost: 10M</div>
-            <button id="rebirth-btn" onclick="App.rebirth()" style="width:280px; padding:15px; border:none; border-radius:8px; background:var(--rebirth); color:#000; font-family:var(--fira); font-weight:bold; cursor:pointer;" disabled>REBIRTH</button>
+            <div id="rb-count-tag">REBIRTHS: 0</div>
+            <div id="rb-price-tag">Next Level: 10M</div>
+            <button id="rebirth-btn" onclick="App.rebirth()" style="width:320px; padding:15px; border:none; border-radius:8px; background:var(--rebirth); color:#000; font-family:var(--fira); font-weight:bold; cursor:pointer;" disabled>REBIRTH</button>
         </div>
     </div>
 
@@ -127,7 +127,7 @@
     <div class="stat"><label>CPS</label><span id="st-cps">0</span></div>
     <div class="stat"><label>CPC</label><span id="st-cpc">1</span></div>
     <div class="stat"><label>CRIT</label><span id="st-crit">5%</span></div>
-    <div class="stat"><label>MULTI</label><span id="st-mult">×1.0</span></div>
+    <div class="stat"><label>TOTAL MULTI</label><span id="st-mult">×1.0</span></div>
 </div>
 
 <script>
@@ -142,7 +142,7 @@ const App = (() => {
     const BASE_UPGRADES = [
         { id:'u1',  n:'Muscle Fiber',      type:'CPC', p:2,       c:15,      s:1.15 },
         { id:'u2',  n:'Auto-Clicker',      type:'CPS', p:1,       c:100,     s:1.16 },
-        { id:'u3',  n:'Precision Blows',   type:'CRIT',p:0.01,    c:400,     s:1.50, isCrit:true },
+        { id:'u3',  n:'Precision Blows',   type:'CRIT',p:0.01,    c:400,     s:1.50 },
         { id:'u4',  n:'Protein Synth',     type:'CPC', p:10,      c:800,     s:1.18 },
         { id:'u5',  n:'Neural Link',       type:'CPS', p:12,      c:3000,    s:1.20 },
         { id:'u6',  n:'Hybrid Vigor',      type:'BOTH',p:25,      c:15000,   s:1.25 },
@@ -150,15 +150,15 @@ const App = (() => {
         { id:'u8',  n:'Gravity Forge',     type:'CPC', p:1500,    c:1.5e6,   s:1.28 },
         { id:'u9',  n:'Dyson Swarm',       type:'CPS', p:10000,   c:1.2e7,   s:1.30 },
         { id:'u10', n:'Supernova Core',    type:'BOTH',p:6500,    c:2.5e8,   s:1.35 },
-        { id:'u11', n:'Deadly Intent',     type:'CRIT',p:0.02,    c:8e8,     s:2.0, isCrit:true },
+        { id:'u11', n:'Deadly Intent',     type:'CRIT',p:0.02,    c:8e8,     s:2.0 },
         { id:'u12', n:'Event Horizon',     type:'CPC', p:1.5e6,   c:6e10,    s:1.38 },
         { id:'u13', n:'Dark Matter',       type:'CPS', p:2.2e7,   c:1e12,    s:1.40 },
         { id:'u14', n:'Void Engine',       type:'CPC', p:3e8,     c:1.5e13,  s:1.42 },
         { id:'u15', n:'Reality Split',     type:'BOTH',p:1e8,     c:2e14,    s:1.45 },
-        { id:'u16', n:'Time Dilation',     type:'MULT',p:1.5,     c:1e16,    s:6, isMidas:true },
+        { id:'u16', n:'Time Dilation',     type:'MULT',p:1.5,     c:1e16,    s:6 },
         { id:'u17', n:'Omega Point',       type:'CPS', p:2e12,    c:1e19,    s:1.45 },
         { id:'u18', n:'Reality Anchor',    type:'CPC', p:8e14,    c:1e22,    s:1.50 },
-        { id:'u19', n:'Midas Touch',       type:'MULT',p:4,       c:1e26,    s:12, isMidas:true }
+        { id:'u19', n:'Midas Touch',       type:'MULT',p:4,       c:1e26,    s:12 }
     ];
 
     let S = {
@@ -171,26 +171,35 @@ const App = (() => {
     const saveGame = () => localStorage.setItem('trentonAscendedSave', JSON.stringify(S));
 
     const loadGame = () => {
-        const savedData = localStorage.getItem('trentonAscendedSave');
-        if(savedData) {
-            try {
-                const parsed = JSON.parse(savedData);
-                Object.assign(S, parsed);
-                if(parsed.upgrades) {
-                    S.upgrades = BASE_UPGRADES.map(base => {
-                        const savedU = parsed.upgrades.find(u => u.id === base.id);
-                        return savedU ? savedU : {id:base.id, lvl:0, c:base.c};
-                    });
-                }
-            } catch(e) { console.error("Save error."); }
+        const saved = localStorage.getItem('trentonAscendedSave');
+        if(saved) {
+            const p = JSON.parse(saved);
+            Object.assign(S, p);
+            if(p.upgrades) S.upgrades = BASE_UPGRADES.map(b => p.upgrades.find(u => u.id === b.id) || {id:b.id, lvl:0, c:b.c});
         }
     };
 
+    // --- REBIRTH MATH ---
+    // Base Cost = 10,000,000
+    // Multiplier = 1.6 per level
+    const getRebirthCost = (lvl) => 1e7 * Math.pow(1.6, lvl);
+
     const getStats = () => {
-        const rbMult = 1 + (S.rebirths * 1.0);
+        const rbMult = 1 + (S.rebirths * 1.5); // Rebirths grant 150% bonus each
         const gMult = rbMult * S.midasMult;
-        const rbPrice = 1e7 * Math.pow(5, S.rebirths);
-        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, gMult, crit: Math.min(S.crit, 0.65), rbPrice };
+        
+        // Find how many rebirths we can afford (Bulk Rebirthing)
+        let bulk = 0;
+        let tempScore = S.score;
+        let nextCost = getRebirthCost(S.rebirths);
+        
+        while (tempScore >= nextCost) {
+            tempScore -= nextCost;
+            bulk++;
+            nextCost = getRebirthCost(S.rebirths + bulk);
+        }
+
+        return { eCpc: S.cpc * gMult, eCps: S.cps * gMult, gMult, crit: Math.min(S.crit, 0.65), rbPrice: getRebirthCost(S.rebirths), bulk };
     };
 
     const refresh = () => {
@@ -200,24 +209,28 @@ const App = (() => {
         document.getElementById('st-cpc').innerText = fmt(st.eCpc);
         document.getElementById('st-crit').innerText = Math.round(st.crit * 100) + '%';
         document.getElementById('st-mult').innerText = '×' + st.gMult.toFixed(1);
+        
+        document.getElementById('rb-count-tag').innerText = `REBIRTHS: ${S.rebirths}`;
+        document.getElementById('rb-price-tag').innerText = `Next Level: ${fmt(st.rbPrice)}`;
+        
+        const btn = document.getElementById('rebirth-btn');
+        if (st.bulk > 0) {
+            btn.innerText = `REBIRTH (+${st.bulk} LEVELS)`;
+            btn.disabled = false;
+        } else {
+            btn.innerText = `NEED ${fmt(st.rbPrice - S.score)} MORE`;
+            btn.disabled = true;
+        }
 
         S.upgrades.forEach((u, i) => {
             const el = document.getElementById('card-' + u.id);
             if (!el) return;
             const def = BASE_UPGRADES[i];
-            const isAtCap = def.type === 'CRIT' && S.crit >= 0.65;
-            el.classList.toggle('locked', S.score < u.c || isAtCap);
-            el.querySelector('.cell-price').innerText = isAtCap ? "MAXED" : fmt(u.c);
+            const isCap = def.type === 'CRIT' && S.crit >= 0.65;
+            el.classList.toggle('locked', S.score < u.c || isCap);
+            el.querySelector('.cell-price').innerText = isCap ? "MAX" : fmt(u.c);
             el.querySelector('.card-lvl').innerText = 'LVL ' + u.lvl;
-            let impactStr = def.type === 'CRIT' ? "+" + Math.round(def.p * u.lvl * 100) + "%" :
-                            def.type === 'MULT' ? "×" + fmt(Math.pow(def.p, u.lvl)) : "+" + fmt(def.p * u.lvl);
-            el.querySelector('.cell-total').innerText = impactStr;
         });
-
-        const rbG = S.score >= st.rbPrice ? 1 : 0;
-        document.getElementById('rb-price-tag').innerText = `Next Rebirth: ${fmt(st.rbPrice)}`;
-        document.getElementById('rebirth-btn').innerText = rbG > 0 ? "REBIRTH NOW!" : `NEED ${fmt(st.rbPrice - S.score)} MORE`;
-        document.getElementById('rebirth-btn').disabled = rbG <= 0;
     };
 
     const renderShop = () => {
@@ -225,84 +238,14 @@ const App = (() => {
         list.innerHTML = '';
         BASE_UPGRADES.forEach((def, i) => {
             const card = document.createElement('div');
-            card.className = `card ${def.isMidas ? 'is-midas' : ''} ${def.isCrit ? 'is-crit-up' : ''}`;
+            card.className = `card`;
             card.id = 'card-' + def.id;
             card.innerHTML = `<div class="card-inner">
                 <div class="card-top"><span class="card-name">${def.n}</span><span class="card-lvl">LVL 0</span></div>
                 <div class="stat-stack">
-                    <div class="data-line"><span class="d-label">Per Lvl</span><span class="d-val boost">+${def.type === 'CRIT' ? (def.p*100)+"%" : fmt(def.p)} ${def.type}</span></div>
-                    <div class="data-line"><span class="d-label">Total</span><span class="d-val total cell-total">0</span></div>
+                    <div class="data-line"><span class="d-label">Per Lvl</span><span class="d-val boost">+${def.type === 'CRIT' ? (def.p*100)+"%" : fmt(def.p)}</span></div>
                 </div>
                 <div class="data-line" style="margin-top:auto"><span class="d-label">Price</span><span class="d-val price cell-price">0</span></div>
             </div>`;
             card.onclick = () => buyU(i);
-            list.appendChild(card);
-        });
-        refresh();
-    };
-
-    const buyU = i => {
-        const def = BASE_UPGRADES[i], u = S.upgrades[i];
-        let count = S.buyMult === 'MAX' ? 1000 : S.buyMult;
-        for(let j=0; j<count; j++){
-            if (S.score < u.c || (def.type === 'CRIT' && S.crit >= 0.65)) break;
-            S.score -= u.c; u.lvl++;
-            if(def.type === 'CPS' || def.type === 'BOTH') S.cps += def.p;
-            if(def.type === 'CPC' || def.type === 'BOTH') S.cpc += def.p;
-            if(def.type === 'CRIT') S.crit += def.p;
-            if(def.type === 'MULT') S.midasMult *= def.p;
-            u.c *= def.s;
-            if(S.buyMult !== 'MAX' && j === count-1) break;
-        }
-        saveGame(); refresh();
-    };
-
-    return {
-        click: e => {
-            const st = getStats();
-            const isCrit = Math.random() < st.crit;
-            S.score += st.eCpc * (isCrit ? 10 : 1);
-            const rip = document.createElement('div');
-            rip.className = 'ripple' + (isCrit ? ' is-crit' : '');
-            rip.style.left = e.clientX + 'px'; rip.style.top = e.clientY + 'px';
-            document.body.appendChild(rip); setTimeout(() => rip.remove(), 600);
-            refresh();
-        },
-        setMult: m => {
-            S.buyMult = m;
-            document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        },
-        toggleMusic: () => {
-            if(musicPlaying) { clearTimeout(musicTimer); if(audioCtx) audioCtx.close(); musicPlaying=false; document.getElementById('music-btn').innerText='♪ MUSIC OFF'; return; }
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const master = audioCtx.createGain(); master.gain.value = 0.15; master.connect(audioCtx.destination);
-            const notes = [55, 65, 73, 82]; let noteIdx = 0; let nextNoteTime = audioCtx.currentTime;
-            const schedule = () => {
-                while(nextNoteTime < audioCtx.currentTime + 0.1) {
-                    const osc = audioCtx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = notes[noteIdx % 4];
-                    const env = audioCtx.createGain(); env.gain.setValueAtTime(0.5, nextNoteTime); env.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.1);
-                    osc.connect(env); env.connect(master); osc.start(nextNoteTime); osc.stop(nextNoteTime + 0.1);
-                    noteIdx++; nextNoteTime += 0.15;
-                }
-                musicTimer = setTimeout(schedule, 25);
-            };
-            schedule();
-            musicPlaying=true; document.getElementById('music-btn').innerText='♪ MUSIC ON';
-        },
-        rebirth: () => {
-            const st = getStats();
-            if(S.score >= st.rbPrice) {
-                S.rebirths++; S.score=0; S.cps=0; S.cpc=1; S.crit=0.05; S.midasMult=1;
-                S.upgrades.forEach((u,i)=> { u.lvl=0; u.c=BASE_UPGRADES[i].c; });
-                saveGame(); renderShop();
-            }
-        },
-        wipeSave: () => { localStorage.removeItem('trentonAscendedSave'); location.reload(); },
-        init: () => { loadGame(); renderShop(); setInterval(() => { S.score += getStats().eCps / 10; refresh(); }, 100); }
-    };
-})();
-window.onload = () => App.init();
-</script>
-</body>
-</html>
+            list.
